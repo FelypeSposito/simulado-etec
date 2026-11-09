@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1d48c9">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Simulado Vestibulinho Etec</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600&family=Bricolage+Grotesque:opsz,wght@12..96,700&display=swap">
+<style>
+/* Layout: folha de prova numa coluna só, uma questão por tela, cartão-resposta como grade de bolinhas */
+:root{
+  --bg:#eef1f6;--surface:#fff;--ink:#16202e;--muted:#566275;--line:#d6dce6;
+  --pen:#1d48c9;--pen-soft:#e3eafc;--ok:#18794a;--ok-soft:#e1f3e9;--bad:#b3261e;--bad-soft:#fbe5e3;
+  --display:"Bricolage Grotesque",system-ui,sans-serif;--body:"Lexend",system-ui,sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f131a;--surface:#171c26;--ink:#e7ebf2;--muted:#9aa4b6;--line:#2b3442;
+  --pen:#86a2ff;--pen-soft:#1f2a47;--ok:#58c88c;--ok-soft:#163325;--bad:#ff8a80;--bad-soft:#3a1d1b;color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f131a;--surface:#171c26;--ink:#e7ebf2;--muted:#9aa4b6;--line:#2b3442;
+  --pen:#86a2ff;--pen-soft:#1f2a47;--ok:#58c88c;--ok-soft:#163325;--bad:#ff8a80;--bad-soft:#3a1d1b;color-scheme:dark}
+body{background:var(--bg);color:var(--ink);font:400 17px/1.6 var(--body)}
+.wrap{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 120px}
+h1,h2{font-family:var(--display);line-height:1.15;text-wrap:balance;margin:0}
+h1{font-size:2rem}h2{font-size:1.4rem}
+.muted{color:var(--muted)}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:20px}
+.stack{display:flex;flex-direction:column;gap:16px}
+.facts{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0}
+.facts div{background:var(--bg);border-radius:10px;padding:10px 12px}
+.facts dt{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.facts dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+label{font-weight:500}
+input[type=text]{width:100%;box-sizing:border-box;font:inherit;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink)}
+button{font:inherit;cursor:pointer}
+.btn{border:0;border-radius:12px;padding:14px 18px;font-weight:600;background:var(--pen);color:var(--surface)}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn:disabled{opacity:.4;cursor:default}
+:focus-visible{outline:3px solid var(--pen);outline-offset:2px}
+/* barra da prova */
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.bar .in{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;display:flex;align-items:center;gap:12px;justify-content:space-between}
+.clock{font-variant-numeric:tabular-nums;font-weight:600}
+.prog{height:4px;background:var(--line)}.prog i{display:block;height:100%;background:var(--pen);transition:width .2s}
+.qnum{font-family:var(--display);font-size:1.1rem}
+.area{display:inline-block;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--pen);background:var(--pen-soft);border-radius:99px;padding:3px 10px;font-weight:600}
+.texto{white-space:pre-line;border-left:3px solid var(--line);padding-left:14px;color:var(--ink);font-size:.98rem}
+.fonte{font-size:.8rem;color:var(--muted)}
+.alts{display:flex;flex-direction:column;gap:10px;list-style:none;margin:0;padding:0}
+.alt{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:12px}
+.alt .b{flex:none;width:30px;height:30px;border-radius:50%;border:2px solid var(--muted);display:grid;place-items:center;font-weight:600;font-size:.9rem}
+.alt[aria-pressed="true"]{border-color:var(--pen);background:var(--pen-soft)}
+.alt[aria-pressed="true"] .b{background:var(--pen);border-color:var(--pen);color:var(--surface)}
+.nav{position:fixed;left:0;right:0;bottom:0;background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.nav .in{max-width:680px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:10px;display:flex;gap:10px}
+.nav .btn{flex:1}
+/* cartão-resposta */
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.cell{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 0;font-variant-numeric:tabular-nums;font-size:.9rem}
+.cell.on{background:var(--pen-soft);border-color:var(--pen);font-weight:600}
+.cell.cur{outline:2px solid var(--ink)}
+.cell.ok{background:var(--ok-soft);border-color:var(--ok)}.cell.no{background:var(--bad-soft);border-color:var(--bad)}
+.warn{background:var(--bad-soft);border:1px solid var(--bad);border-radius:12px;padding:14px}
+.big{font-family:var(--display);font-size:3rem;line-height:1;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+td,th{padding:8px 4px;border-bottom:1px solid var(--line);text-align:left}th{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+td:last-child,th:last-child{text-align:right}
+.rev{border-top:1px solid var(--line);padding-top:12px}
+.tag{font-weight:600}.tag.ok{color:var(--ok)}.tag.no{color:var(--bad)}
+.row{display:flex;flex-wrap:wrap;gap:10px}
+@media (min-width:560px){.facts{grid-template-columns:repeat(4,1fr)}.grid{grid-template-columns:repeat(10,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+const AREAS={LP:"Língua Portuguesa",MAT:"Matemática",CN:"Ciências da Natureza",HIS:"História",GEO:"Geografia",CID:"Cidadania e cotidiano"};
+const T_CIDA="Dona Cida acorda antes do sol. Passa o café, confere a marmita e sai para o ponto ainda de chinelo, com o sapato na sacola. Diz que é para não gastar a sola na ladeira. No ônibus, troca o calçado, ajeita o cabelo no reflexo da janela e, quando desce na avenida, ninguém imagina a ladeira que ela subiu.";
+const T_AVISO="Prezados moradores,\nInformamos que, devido à manutenção da bomba d'água, o abastecimento será interrompido na quinta-feira, das 8h às 14h. Recomendamos que armazenem água para o período.\nA Administração";
+const T_POEMA="A cidade dorme de olhos abertos:\njanelas acesas,\nsirenes que cantam sem melodia,\ne um gato que atravessa a rua\ncomo quem não deve nada a ninguém.";
+const Q=[
+{a:"LP",t:T_CIDA,f:"Texto escrito para este simulado.",q:"No contexto, a expressão final “ninguém imagina a ladeira que ela subiu” faz referência",o:["apenas ao caminho de terra perto da casa de Dona Cida.","ao esforço diário e às dificuldades da personagem, que não aparecem para quem a vê na avenida.","à falta de interesse de Dona Cida pelo trabalho.","ao cansaço provocado somente pela viagem de ônibus.","à vaidade da personagem, preocupada só com a aparência."],c:1,e:"Sentido figurado: a “ladeira” representa a rotina difícil que ninguém vê."},
+{a:"LP",t:T_CIDA,q:"A atitude de levar o sapato na sacola e ir de chinelo até o ponto revela, principalmente,",o:["pressa para não perder o ônibus.","descuido com a própria aparência.","preocupação em economizar e conservar o calçado.","desconforto com o sapato novo.","medo de escorregar na ladeira."],c:2,e:"O próprio texto explica: “para não gastar a sola”."},
+{a:"LP",t:T_AVISO,q:"Na frase “devido à manutenção da bomba d'água”, a expressão destacada introduz uma ideia de",o:["finalidade.","causa.","oposição.","condição.","comparação."],c:1,e:"“Devido a” = por causa de. A manutenção é a causa da interrupção."},
+{a:"LP",t:T_AVISO,q:"O principal objetivo desse texto é",o:["narrar um fato imaginário.","convencer o leitor a comprar um produto.","expressar os sentimentos do autor.","informar uma situação e orientar os moradores sobre como agir.","defender uma opinião pessoal."],c:3,e:"É um comunicado: informa (falta d'água) e orienta (armazenar água)."},
+{a:"LP",t:"— vc vem hj?\n— blz, tô saindo agora. chego em 10 min",f:"Conversa em aplicativo de mensagens.",q:"Sobre a linguagem usada nessa conversa, é correto afirmar que",o:["está errada e deve ser evitada em qualquer situação.","é própria de documentos oficiais.","mostra que os falantes não conhecem a norma-padrão.","é inadequada porque usa abreviações.","é adequada ao contexto informal e à rapidez da comunicação digital."],c:4,e:"Variação linguística: a adequação depende do contexto, não existe “erro” aqui."},
+{a:"LP",q:"Assinale a alternativa em que o acento grave (crase) foi usado corretamente.",o:["Fui à pé até o trabalho.","Entreguei o documento à ela.","Amanhã cedo vou à feira do bairro.","Começou à chover forte.","Assisti à dois filmes ontem."],c:2,e:"“Ir a + a feira”. Não há crase antes de palavra masculina, pronome pessoal, verbo ou numeral."},
+{a:"LP",q:"Assinale a frase que está de acordo com a norma-padrão da língua portuguesa.",o:["Faz três meses que não chove na região.","Houveram muitas reclamações na reunião.","Existe muitas pessoas na fila do posto.","Sobrou poucas vagas para o curso.","Fazem dois anos que me mudei."],c:0,e:"“Fazer” indicando tempo e “haver” no sentido de existir não vão para o plural."},
+{a:"LP",t:"VENDE-SE CADEIRA PARA SENHORA COM PERNAS QUEBRADAS.\nTratar com Sr. Jorge.",f:"Anúncio de classificados (adaptado).",q:"O anúncio provoca humor porque",o:["usa palavras estrangeiras.","apresenta erro de ortografia.","é ambíguo: não fica claro se as pernas quebradas são da cadeira ou da senhora.","exagera o valor do produto.","não informa como falar com o vendedor."],c:2,e:"Ambiguidade causada pela posição do termo “com pernas quebradas”."},
+{a:"LP",t:T_POEMA,f:"Poema escrito para este simulado.",q:"No verso “A cidade dorme de olhos abertos”, a figura de linguagem predominante é a",o:["hipérbole, pois há exagero intencional.","metonímia, pois troca a parte pelo todo.","personificação, pois atribui ações humanas a algo não humano.","onomatopeia, pois imita um som.","antítese, pois apresenta ideias opostas."],c:2,e:"Cidade não dorme nem tem olhos: personificação (prosopopeia)."},
+{a:"LP",t:T_POEMA,q:"No último verso, a comparação “como quem não deve nada a ninguém” sugere que o gato atravessa a rua com",o:["medo e desconfiança.","tranquilidade e despreocupação.","pressa e agitação.","tristeza e solidão.","raiva dos carros."],c:1,e:"Quem “não deve nada” anda sem preocupação."},
+{a:"LP",t:"Doe sangue.\nVocê não vê quem ajuda, mas alguém vai ver você como herói.",f:"Campanha publicitária (texto criado para o simulado).",q:"O uso do verbo “Doe”, no modo imperativo, tem a função de",o:["descrever uma ação do passado.","expressar dúvida sobre a doação.","relatar um fato científico.","criticar quem não doa sangue.","convidar e persuadir o leitor a agir."],c:4,e:"Imperativo em campanhas = apelo direto ao leitor."},
+{a:"LP",t:"Após uma semana de protestos dos moradores, a medida que aumentava a tarifa do ônibus foi revogada pela prefeitura.",q:"No texto, a palavra “revogada” pode ser substituída, sem mudança de sentido, por",o:["anulada.","aprovada.","adiada.","ampliada.","publicada."],c:0,e:"Revogar = tornar sem efeito, anular."},
+{a:"MAT",t:"Promoção do mercado: iogurte a R$ 4,50 a unidade. LEVE 3, PAGUE 2.",q:"Uma pessoa levou 6 iogurtes aproveitando a promoção. Ela pagou",o:["R$ 27,00.","R$ 22,50.","R$ 18,00.","R$ 13,50.","R$ 9,00."],c:2,e:"6 iogurtes = 2 grupos de 3; paga 4 × 4,50 = R$ 18,00."},
+{a:"MAT",q:"Um trabalhador recebia R$ 2.400,00 e teve um reajuste de 5%. Seu novo salário passou a ser",o:["R$ 2.405,00.","R$ 2.450,00.","R$ 2.500,00.","R$ 2.520,00.","R$ 2.640,00."],c:3,e:"5% de 2.400 = 120; 2.400 + 120 = 2.520."},
+{a:"MAT",q:"Em um mapa feito na escala 1 : 500 000, a distância entre duas cidades é de 4 cm. A distância real entre elas é de",o:["2 km.","20 km.","200 km.","0,2 km.","50 km."],c:1,e:"4 × 500 000 = 2 000 000 cm = 20 km."},
+{a:"MAT",q:"O piso de uma cozinha retangular de 3 m por 4 m será coberto com placas quadradas de 50 cm de lado. Sem considerar perdas, serão necessárias",o:["12 placas.","24 placas.","48 placas.","60 placas.","96 placas."],c:2,e:"Área = 12 m²; cada placa 0,5 × 0,5 = 0,25 m²; 12 ÷ 0,25 = 48."},
+{a:"MAT",t:"Consumo de água de uma casa\nJaneiro: 18 m³\nFevereiro: 15 m³\nMarço: 21 m³\nAbril: 18 m³",q:"A média mensal de consumo de água nesses quatro meses foi de",o:["15 m³.","16 m³.","17 m³.","18 m³.","21 m³."],c:3,e:"(18+15+21+18) ÷ 4 = 72 ÷ 4 = 18."},
+{a:"MAT",q:"Quatro pedreiros, trabalhando no mesmo ritmo, constroem um muro em 6 dias. Com apenas 3 pedreiros, no mesmo ritmo, o muro ficará pronto em",o:["8 dias.","4 dias.","4,5 dias.","7 dias.","9 dias."],c:0,e:"Grandezas inversas: 4 × 6 = 24 dias de trabalho; 24 ÷ 3 = 8."},
+{a:"MAT",q:"Em uma urna há 3 bolas vermelhas, 5 azuis e 2 verdes, todas iguais no tamanho. Retirando uma bola ao acaso, a chance de ela ser azul é de",o:["5%.","20%.","25%.","30%.","50%."],c:4,e:"5 azuis em 10 bolas = 5/10 = 50%."},
+{a:"MAT",q:"Marta tem o triplo da idade do filho. Somando as duas idades, o resultado é 48 anos. A idade de Marta é",o:["12 anos.","24 anos.","32 anos.","36 anos.","40 anos."],c:3,e:"x + 3x = 48 → x = 12 (filho); Marta = 36."},
+{a:"MAT",q:"Uma pessoa pegou R$ 1.000,00 emprestados a juros simples de 2% ao mês, por 5 meses. Ao final, ela pagará, no total,",o:["R$ 1.010,00.","R$ 1.020,00.","R$ 1.100,00.","R$ 1.200,00.","R$ 2.000,00."],c:2,e:"Juros = 1.000 × 0,02 × 5 = 100; total 1.100."},
+{a:"MAT",t:"Celular\nÀ vista: R$ 1.200,00\nA prazo: 10 parcelas de R$ 138,00",q:"Comprando a prazo, o cliente pagará a mais, em relação ao preço à vista,",o:["10%.","15%.","18%.","20%.","38%."],c:1,e:"10 × 138 = 1.380; diferença 180; 180 ÷ 1.200 = 15%."},
+{a:"MAT",q:"Uma caixa-d'água tem formato de bloco retangular com medidas internas de 2 m de comprimento, 1,5 m de largura e 1 m de altura. Sabendo que 1 m³ = 1.000 litros, a capacidade da caixa é de",o:["300 litros.","450 litros.","3.000 litros.","4.500 litros.","30.000 litros."],c:2,e:"2 × 1,5 × 1 = 3 m³ = 3.000 L."},
+{a:"MAT",t:"Tarifa de táxi\nBandeirada: R$ 5,50\nPreço por quilômetro rodado: R$ 3,00",q:"Uma corrida custou R$ 32,50. A distância percorrida foi de",o:["9 km.","8 km.","10 km.","11 km.","12 km."],c:0,e:"32,50 − 5,50 = 27; 27 ÷ 3 = 9 km."},
+{a:"CN",q:"Uma roupa molhada estendida no varal fica seca depois de algumas horas. A mudança de estado físico que explica esse fato é a",o:["fusão.","solidificação.","condensação.","evaporação.","sublimação."],c:3,e:"A água líquida passa para vapor: evaporação."},
+{a:"CN",q:"Ao servir um refrigerante bem gelado em um copo de vidro, logo aparecem gotinhas de água do lado de fora do copo. Essas gotas surgem porque",o:["o refrigerante atravessa os poros do vidro.","o vapor de água do ar se condensa ao encostar no copo frio.","o gelo derrete dentro do copo e escorre.","o vidro produz água quando esfria.","o gás do refrigerante vira água ao sair do copo."],c:1,e:"Condensação: vapor do ambiente esfria em contato com o copo e vira líquido."},
+{a:"CN",t:"capim → gafanhoto → sapo → cobra → gavião",f:"Cadeia alimentar.",q:"Nessa cadeia alimentar, o sapo ocupa a posição de",o:["produtor.","consumidor primário.","consumidor secundário.","consumidor terciário.","decompositor."],c:2,e:"Capim = produtor; gafanhoto = 1º consumidor; sapo = 2º."},
+{a:"CN",q:"A dengue é transmitida pela picada do mosquito Aedes aegypti. Uma das medidas mais eficazes para prevenir a doença é",o:["tomar antibióticos quando houver casos no bairro.","evitar contato com pessoas doentes.","ferver a água antes de beber.","lavar bem frutas e verduras.","eliminar recipientes que acumulem água parada."],c:4,e:"O mosquito se reproduz em água parada; sem criadouro, sem mosquito."},
+{a:"CN",q:"Entre as fontes de energia abaixo, a única considerada renovável é",o:["o carvão mineral.","o petróleo.","o gás natural.","a energia eólica.","o óleo diesel."],c:3,e:"Vento não se esgota; as demais são combustíveis fósseis."},
+{a:"CN",q:"Um ônibus saiu da rodoviária às 7h e chegou ao destino às 10h, percorrendo 180 km. Sua velocidade média foi de",o:["30 km/h.","45 km/h.","60 km/h.","90 km/h.","540 km/h."],c:2,e:"180 km ÷ 3 h = 60 km/h."},
+{a:"CN",q:"No sangue, as células responsáveis pelo transporte de oxigênio dos pulmões para o restante do corpo são",o:["as hemácias.","os leucócitos.","as plaquetas.","os neurônios.","os anticorpos."],c:0,e:"Hemácias (glóbulos vermelhos) têm hemoglobina, que leva o oxigênio."},
+{a:"CN",q:"Ao misturar água e óleo de cozinha em um recipiente, formam-se duas camadas. Para separar esses líquidos, o método mais adequado é a",o:["filtração.","decantação (com funil de separação).","destilação simples.","peneiração.","evaporação."],c:1,e:"Líquidos que não se misturam e têm densidades diferentes: decantação."},
+{a:"CN",q:"Vacinas e soros são usados na área da saúde. A diferença entre eles é que",o:["ambos têm a mesma função e podem ser trocados.","o soro previne doenças e a vacina só trata.","a vacina já contém anticorpos prontos.","o soro faz o corpo produzir memória para sempre.","a vacina estimula o corpo a produzir defesas, enquanto o soro já traz anticorpos prontos."],c:4,e:"Vacina = prevenção (memória imunológica); soro = tratamento imediato."},
+{a:"HIS",t:"Em 13 de maio de 1888 foi assinada a Lei Áurea, que extinguiu a escravidão no Brasil. A lei, porém, não veio acompanhada de medidas como acesso à terra, à educação ou ao trabalho remunerado para os libertos.",q:"Uma consequência dessa forma de abolição foi",o:["a imediata igualdade social entre negros e brancos.","a distribuição de terras para todos os ex-escravizados.","o fim da monarquia no mesmo dia da assinatura da lei.","a marginalização de grande parte da população liberta, com efeitos que chegam aos dias de hoje.","a volta dos libertos para a África com apoio do governo."],c:3,e:"Sem políticas de integração, a população liberta ficou excluída; desigualdade persistente."},
+{a:"HIS",q:"A Constituição de 1988, chamada de “Constituição Cidadã”, é considerada um marco porque",o:["instituiu a monarquia parlamentarista no Brasil.","marcou a redemocratização após o período da ditadura militar, garantindo direitos sociais e o voto direto.","proibiu o voto das mulheres.","foi escrita por D. Pedro II.","criou o regime militar no país."],c:1,e:"Promulgada após a ditadura (1964–1985), ampliou direitos e liberdades."},
+{a:"HIS",q:"A Revolução Industrial, iniciada na Inglaterra no século XVIII, teve como uma de suas características",o:["o fim do trabalho assalariado.","o retorno à produção artesanal.","a diminuição da população das cidades.","a proibição das máquinas nas fábricas.","o uso da máquina a vapor e o trabalho em fábricas, com jornadas longas e baixos salários."],c:4,e:"Máquina a vapor, fábricas, crescimento urbano e exploração do operário."},
+{a:"HIS",q:"Em 1943, durante o governo de Getúlio Vargas, foi criado um conjunto de leis que reuniu direitos como carteira de trabalho, férias e jornada regulamentada. Esse conjunto ficou conhecido como",o:["CLT – Consolidação das Leis do Trabalho.","Código de Defesa do Consumidor.","Estatuto da Criança e do Adolescente.","Lei Áurea.","Constituição de 1988."],c:0,e:"A CLT é de 1943, Era Vargas."},
+{a:"HIS",q:"As Grandes Navegações dos séculos XV e XVI, lideradas por Portugal e Espanha, tinham como principal objetivo",o:["levar os europeus para morar na Ásia.","combater a pirataria no Oceano Pacífico.","encontrar novas rotas comerciais, especialmente para obter especiarias do Oriente.","fugir de uma guerra mundial na Europa.","estudar animais marinhos."],c:2,e:"Busca de rotas para as especiarias e riquezas, contornando o Mediterrâneo."},
+{a:"HIS",q:"A Independência do Brasil, em 1822, teve como característica",o:["a criação imediata de uma república.","a manutenção da monarquia, com D. Pedro I como imperador, e da escravidão.","o fim da escravidão no país.","a participação decisiva de exércitos dos Estados Unidos.","a divisão do território em vários países."],c:1,e:"O Brasil virou Império com D. Pedro I e a escravidão continuou até 1888."},
+{a:"GEO",q:"Uma pessoa está parada de frente para o local onde o Sol nasce. À sua direita estará o ponto cardeal",o:["norte.","sul.","oeste.","leste.","nordeste."],c:1,e:"De frente para o leste: esquerda = norte, direita = sul, costas = oeste."},
+{a:"GEO",q:"Entre as décadas de 1950 e 1980, milhões de brasileiros deixaram o campo em direção às cidades em busca de trabalho. Esse movimento é chamado de",o:["êxodo rural.","transumância.","migração pendular.","imigração.","nomadismo."],c:0,e:"Êxodo rural = saída em massa do campo para a cidade."},
+{a:"GEO",q:"O bioma brasileiro que se estendia por grande parte do litoral e que hoje é o mais devastado, restando pequena parte da área original, é",o:["a Amazônia.","o Cerrado.","a Caatinga.","a Mata Atlântica.","o Pampa."],c:3,e:"A ocupação do litoral desde 1500 destruiu a maior parte da Mata Atlântica."},
+{a:"GEO",q:"Um jogo de futebol começa às 10h em Brasília. Considerando que Londres está 3 horas à frente de Brasília, nesse momento serão, em Londres,",o:["7h.","10h.","12h.","13h.","16h."],c:3,e:"Londres fica a leste: soma 3 h. 10h + 3h = 13h."},
+{a:"GEO",q:"Em grandes cidades, a temperatura costuma ser mais alta no centro do que nos bairros afastados e arborizados. Esse fenômeno, chamado ilha de calor, é causado principalmente",o:["pela proximidade com o mar.","pelo excesso de chuvas no verão.","pelo asfalto, concreto, poluição e pouca vegetação nas áreas centrais.","pela altitude elevada das cidades.","pela presença de rios urbanos."],c:2,e:"Superfícies que absorvem calor + pouca área verde."},
+{a:"GEO",q:"A chuva ácida pode danificar plantações, monumentos e prejudicar rios. Sua principal causa é",o:["o desmatamento da Amazônia.","o uso excessivo de água na agricultura.","o derretimento das geleiras.","o lixo jogado nas ruas.","a liberação de gases poluentes pela queima de combustíveis fósseis em indústrias e veículos."],c:4,e:"Óxidos de enxofre e nitrogênio reagem com a água da atmosfera."},
+{a:"CID",q:"Uma pessoa comprou uma geladeira que apresentou defeito. De acordo com o Código de Defesa do Consumidor, o prazo para reclamar de defeito aparente em produto durável é de",o:["7 dias.","15 dias.","90 dias.","1 ano.","5 anos."],c:2,e:"Art. 26 do CDC: 30 dias para não duráveis, 90 dias para duráveis."},
+{a:"CID",t:"Cores da coleta seletiva\nAzul: papel\nVermelho: plástico\nVerde: vidro\nAmarelo: metal",q:"Uma garrafa PET de refrigerante, já vazia e limpa, deve ser colocada no coletor de cor",o:["azul.","vermelha.","verde.","amarela.","marrom."],c:1,e:"PET é plástico: vermelho."},
+{a:"CID",q:"A Lei nº 11.340/2006, conhecida como Lei Maria da Penha, tem como objetivo",o:["regulamentar o trabalho doméstico.","garantir vagas para mulheres em universidades.","definir regras para a aposentadoria.","proteger crianças em situação de trabalho infantil.","criar mecanismos para coibir a violência doméstica e familiar contra a mulher."],c:4,e:"É a lei de proteção à mulher contra violência doméstica e familiar."},
+{a:"CID",t:"INFORMAÇÃO NUTRICIONAL\nPorção de 30 g (6 biscoitos)\nAçúcares: 6 g",f:"Rótulo de um pacote de biscoito de 150 g.",q:"Se uma pessoa comer o pacote inteiro, ela vai ingerir, de açúcar,",o:["6 g.","12 g.","18 g.","30 g.","150 g."],c:3,e:"150 g = 5 porções de 30 g; 5 × 6 g = 30 g."},
+{a:"CID",q:"Pilhas, baterias de celular e aparelhos eletrônicos velhos não devem ser jogados no lixo comum porque",o:["contêm metais pesados que contaminam o solo e a água, devendo ir para pontos de coleta específicos.","ocupam muito espaço nos caminhões de lixo.","podem ser vendidos por um preço alto.","são feitos apenas de papel reciclável.","atraem insetos transmissores de doenças."],c:0,e:"Mercúrio, chumbo e cádmio contaminam o ambiente; há pontos de coleta próprios."}
+];
+const L="ABCDE", KEY="simuladoEtec1", LIMITE=4*3600;
+let S=load()||novo(), tick=null, db=null;
+function novo(){return{fase:"inicio",nome:"",i:0,r:Array(Q.length).fill(null),tq:Array(Q.length).fill(0),seg:0,inicio:null,fim:null,id:null}}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const $=s=>document.querySelector(s), app=$("#app");
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const hms=s=>{s=Math.max(0,Math.floor(s));return[Math.floor(s/3600),Math.floor(s/60)%60,s%60].map((n,k)=>k?String(n).padStart(2,"0"):n).join(":")};
+const resp=()=>S.r.filter(x=>x!==null).length;
+
+function render(){
+  clearInterval(tick);
+  if(S.fase==="inicio")return inicio();
+  if(S.fase==="prova"){prova();tick=setInterval(()=>{S.seg++;S.tq[S.i]++;const c=$("#clock");if(c)c.textContent=hms(LIMITE-S.seg);if(S.seg%5===0)save();if(S.seg>=LIMITE)entregar()},1000);return}
+  if(S.fase==="cartao")return cartao();
+  resultado();
+}
+function inicio(){
+  const andamento=S.inicio&&resp()>0;
+  app.innerHTML=`<div class="wrap stack">
+  <div class="stack" style="gap:8px"><span class="area" style="align-self:flex-start">Simulado 1</span>
+  <h1>Vestibulinho Etec</h1>
+  <p class="muted" style="margin:0">Prova no mesmo formato do processo seletivo para o 1º módulo dos cursos técnicos: questões de múltipla escolha baseadas no conteúdo do Ensino Fundamental II, com textos, tabelas e situações do dia a dia.</p></div>
+  <div class="card stack">
+    <dl class="facts"><div><dt>Questões</dt><dd>${Q.length}</dd></div><div><dt>Alternativas</dt><dd>5 (A a E)</dd></div><div><dt>Tempo</dt><dd>4 horas</dd></div><div><dt>Corretas</dt><dd>1 por questão</dd></div></dl>
+    <div class="stack" style="gap:6px"><label for="nome">Seu nome</label><input id="nome" type="text" autocomplete="name" value="${esc(S.nome)}" placeholder="Ex.: Maria"></div>
+    <ul class="muted" style="margin:0;padding-left:20px">
+      <li>Faça como no dia da prova: sem consulta, sem calculadora, com papel para rascunho.</li>
+      <li>Dá para voltar e trocar respostas antes de entregar.</li>
+      <li>O relógio mostra quanto tempo ainda resta.</li>
+    </ul>
+    <button class="btn" id="go">${andamento?`Continuar (${resp()} de ${Q.length} respondidas)`:"Começar a prova"}</button>
+    ${andamento?`<button class="btn ghost" id="zera">Recomeçar do zero</button>`:""}
+  </div></div>`;
+  $("#go").onclick=()=>{S.nome=$("#nome").value.trim();if(!S.inicio){S.inicio=new Date().toISOString();S.id=Date.now().toString(36)}S.fase="prova";save();render();scrollTo(0,0)};
+  if($("#zera"))$("#zera").onclick=()=>{S=novo();save();render()};
+}
+function prova(){
+  const q=Q[S.i];
+  app.innerHTML=`<div class="bar"><div class="in"><span class="qnum">Questão ${S.i+1} <span class="muted">/ ${Q.length}</span></span>
+  <span class="clock" aria-label="tempo restante" id="clock">${hms(LIMITE-S.seg)}</span>
+  <button class="btn ghost" id="vercartao" style="padding:8px 12px">Cartão</button></div>
+  <div class="prog"><i style="width:${resp()/Q.length*100}%"></i></div></div>
+  <div class="wrap stack">
+    <span class="area" style="align-self:flex-start">${AREAS[q.a]}</span>
+    ${q.t?`<div class="texto">${esc(q.t)}</div>${q.f?`<div class="fonte">${esc(q.f)}</div>`:""}`:""}
+    <p style="margin:0;font-weight:500">${esc(q.q)}</p>
+    <ul class="alts">${q.o.map((o,k)=>`<li><button class="alt" data-k="${k}" aria-pressed="${S.r[S.i]===k}"><span class="b">${L[k]}</span><span>${esc(o)}</span></button></li>`).join("")}</ul>
+  </div>
+  <div class="nav"><div class="in"><button class="btn ghost" id="ant" ${S.i===0?"disabled":""}>Anterior</button>
+  ${S.i<Q.length-1?`<button class="btn" id="prox">Próxima</button>`:`<button class="btn" id="fim">Revisar e entregar</button>`}</div></div>`;
+  app.querySelectorAll(".alt").forEach(b=>b.onclick=()=>{const k=+b.dataset.k;S.r[S.i]=S.r[S.i]===k?null:k;save();app.querySelectorAll(".alt").forEach(x=>x.setAttribute("aria-pressed",S.r[S.i]===+x.dataset.k));$(".prog i").style.width=resp()/Q.length*100+"%"});
+  $("#ant").onclick=()=>ir(S.i-1);
+  if($("#prox"))$("#prox").onclick=()=>ir(S.i+1);
+  if($("#fim"))$("#fim").onclick=()=>{S.fase="cartao";save();render();scrollTo(0,0)};
+  $("#vercartao").onclick=()=>{S.fase="cartao";save();render();scrollTo(0,0)};
+}
+function ir(i){S.i=i;save();render();scrollTo(0,0)}
+function cartao(){
+  const falta=Q.length-resp();
+  app.innerHTML=`<div class="wrap stack"><h2>Cartão-resposta</h2>
+  <p class="muted" style="margin:0">Toque num número para voltar à questão. Restam ${hms(LIMITE-S.seg)} de prova.</p>
+  <div class="grid">${Q.map((_,k)=>`<button class="cell ${S.r[k]!==null?"on":""} ${k===S.i?"cur":""}" data-k="${k}">${k+1}${S.r[k]!==null?" "+L[S.r[k]]:""}</button>`).join("")}</div>
+  ${falta?`<div class="warn">Faltam <b>${falta}</b> questões sem resposta. Questão em branco conta como erro.</div>`:""}
+  <div class="row"><button class="btn ghost" id="volta">Voltar à prova</button><button class="btn" id="entrega">Entregar a prova</button></div>
+  <div id="conf"></div></div>`;
+  app.querySelectorAll(".cell").forEach(b=>b.onclick=()=>{S.fase="prova";ir(+b.dataset.k)});
+  $("#volta").onclick=()=>{S.fase="prova";save();render()};
+  $("#entrega").onclick=()=>{$("#conf").innerHTML=`<div class="card stack"><b>Entregar agora?</b><span class="muted">Depois de entregar não dá para mudar as respostas.</span><div class="row"><button class="btn" id="sim">Sim, entregar</button><button class="btn ghost" id="nao">Ainda não</button></div></div>`;$("#sim").onclick=entregar;$("#nao").onclick=()=>$("#conf").innerHTML="";$("#sim").focus()};
+}
+function entregar(){S.fase="fim";S.fim=new Date().toISOString();save();enviar();render();scrollTo(0,0)}
+function dados(){
+  const itens=Q.map((q,k)=>({n:k+1,area:AREAS[q.a],marcada:S.r[k]===null?null:L[S.r[k]],correta:L[q.c],acertou:S.r[k]===q.c,tempoSeg:S.tq[k]}));
+  return{nome:S.nome||"(sem nome)",simulado:1,inicio:S.inicio,fim:S.fim,duracaoSeg:S.seg,acertos:itens.filter(x=>x.acertou).length,total:Q.length,itens};
+}
+function texto(){
+  const d=dados();
+  return `Simulado Etec 1 · ${d.nome}\nAcertos: ${d.acertos}/${d.total} · Tempo: ${hms(d.duracaoSeg)}\n`+d.itens.map(x=>`${x.n} ${x.marcada||"-"}${x.acertou?"✓":"✗"+x.correta} ${x.tempoSeg}s`).join("\n");
+}
+async function enviar(){return;
+  try{db=db||await window.claude?.use?.("db");if(!db)return;await db.collection("tentativas").doc(S.id||Date.now().toString(36)).set(dados());const s=$("#salvo");if(s)s.textContent="Respostas salvas online."}catch(e){}
+}
+function resultado(){
+  const d=dados(),pct=Math.round(d.acertos/d.total*100);
+  const porArea=Object.values(AREAS).map(a=>{const it=d.itens.filter(x=>x.area===a);return{a,ok:it.filter(x=>x.acertou).length,n:it.length}});
+  app.innerHTML=`<div class="wrap stack">
+  <div class="card stack"><span class="muted">${esc(d.nome)} · prova entregue</span>
+  <div><span class="big">${d.acertos}</span><span class="muted"> de ${d.total} acertos (${pct}%)</span></div>
+  <span class="muted">Tempo usado: ${hms(d.duracaoSeg)} de 4:00:00</span>
+  
+  <div class="row"><a class="btn" id="zap" target="_blank" rel="noopener" style="text-decoration:none;text-align:center">Enviar pelo WhatsApp</a><button class="btn ghost" id="copiar">Copiar respostas</button><button class="btn ghost" id="refazer">Fazer de novo</button></div>
+  <span class="muted" id="cmsg" style="font-size:.9rem">Copie e mande para quem vai analisar o resultado.</span>
+  <textarea id="txt" readonly hidden style="width:100%;min-height:120px;font:inherit;font-size:.85rem"></textarea></div>
+  <div class="card"><table><thead><tr><th>Área</th><th>Acertos</th></tr></thead><tbody>${porArea.map(p=>`<tr><td>${p.a}</td><td>${p.ok}/${p.n}</td></tr>`).join("")}</tbody></table></div>
+  <h2>Correção</h2>
+  <div class="grid">${d.itens.map(x=>`<a class="cell ${x.acertou?"ok":"no"}" href="#q${x.n}" style="text-align:center;text-decoration:none">${x.n}</a>`).join("")}</div>
+  ${Q.map((q,k)=>{const x=d.itens[k];return`<div class="rev stack" id="q${k+1}" style="gap:6px"><b>Questão ${k+1} <span class="muted" style="font-weight:400">· ${AREAS[q.a]}</span></b>
+  <span>${esc(q.q)}</span>
+  <span>Sua resposta: <span class="tag ${x.acertou?"ok":"no"}">${x.marcada?x.marcada+") "+esc(q.o[S.r[k]]):"em branco"}</span></span>
+  ${x.acertou?"":`<span>Correta: <span class="tag ok">${x.correta}) ${esc(q.o[q.c])}</span></span>`}
+  <span class="muted">${esc(q.e)}</span></div>`}).join("")}
+  </div>`;
+  $("#zap").href="https://wa.me/?text="+encodeURIComponent(texto());$("#copiar").onclick=()=>{const t=texto();navigator.clipboard.writeText(t).then(()=>$("#cmsg").textContent="Copiado! Agora é só colar no WhatsApp.").catch(()=>{const a=$("#txt");a.hidden=false;a.value=t;a.select();$("#cmsg").textContent="Selecione o texto abaixo e copie."})};
+  $("#refazer").onclick=()=>{$("#cmsg").innerHTML=`Isso apaga o resultado atual deste aparelho. <button class="btn ghost" id="ok2" style="padding:6px 10px">Apagar e refazer</button>`;$("#ok2").onclick=()=>{S=novo();save();render()}};
+}
+render();
+</script>
+</body>
+</html>
