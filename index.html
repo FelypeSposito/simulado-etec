@@ -70,6 +70,17 @@ td:last-child,th:last-child{text-align:right}
 .rev{border-top:1px solid var(--line);padding-top:12px}
 .tag{font-weight:600}.tag.ok{color:var(--ok)}.tag.no{color:var(--bad)}
 .row{display:flex;flex-wrap:wrap;gap:10px}
+/* treino por matéria */
+.alt.certa{border-color:var(--ok);background:var(--ok-soft)}
+.alt.errada{border-color:var(--bad);background:var(--bad-soft)}
+.alt.certa .b{background:var(--ok);border-color:var(--ok);color:var(--surface)}
+.alt.errada .b{background:var(--bad);border-color:var(--bad);color:var(--surface)}
+.alt:disabled{cursor:default;color:var(--ink)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.treina{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;font-weight:600}
+.treina .sub{font-size:.75rem;font-weight:400}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:99px;padding:8px 16px;font-weight:500}
+.chip[aria-pressed="true"]{background:var(--pen-soft);border-color:var(--pen);color:var(--pen);font-weight:600}
 @media (min-width:560px){.facts{grid-template-columns:repeat(4,1fr)}.grid{grid-template-columns:repeat(10,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
@@ -82,7 +93,16 @@ const AREAS={LP:"Língua Portuguesa",MAT:"Matemática",CN:"Ciências da Natureza
 const T_CIDA="Dona Cida acorda antes do sol. Passa o café, confere a marmita e sai para o ponto ainda de chinelo, com o sapato na sacola. Diz que é para não gastar a sola na ladeira. No ônibus, troca o calçado, ajeita o cabelo no reflexo da janela e, quando desce na avenida, ninguém imagina a ladeira que ela subiu.";
 const T_AVISO="Prezados moradores,\nInformamos que, devido à manutenção da bomba d'água, o abastecimento será interrompido na quinta-feira, das 8h às 14h. Recomendamos que armazenem água para o período.\nA Administração";
 const T_POEMA="A cidade dorme de olhos abertos:\njanelas acesas,\nsirenes que cantam sem melodia,\ne um gato que atravessa a rua\ncomo quem não deve nada a ninguém.";
-const Q=[
+const T_FEIRA="Seu Antônio monta a barraca de frutas às cinco da manhã. Arruma as laranjas em pirâmide, borrifa água nas folhas de couve e, quando o primeiro freguês chega, já sabe de cor o que ele vai pedir.\n— Duas bananas-prata e um conselho — diz o freguês, rindo.\nSeu Antônio responde que o conselho, hoje, está em promoção: de graça.";
+const T_BIBLIO="A biblioteca estará fechada para reforma de 3 a 14 de março.\nOs livros emprestados poderão ser devolvidos na secretaria da escola, de segunda a sexta, das 9h às 11h.\nContamos com a colaboração de todos.\nA Direção";
+const T_CICLO="PREFEITURA INAUGURA CICLOVIA DE 8 KM NA ZONA LESTE\nA nova ciclovia liga o terminal de ônibus ao parque da cidade e já recebe, segundo a prefeitura, cerca de 400 ciclistas por dia. A obra custou R$ 2 milhões e levou seis meses para ser concluída.";
+const T_CELULAR="CELULAR NA SALA DE AULA: AJUDA OU ATRAPALHA?\nPara muitos professores, o aparelho dispersa a atenção da turma. Mas, quando usado para pesquisas e consultas ao dicionário, ele se transforma em um aliado do aprendizado. O problema, portanto, não está no celular, e sim na maneira como ele é usado.";
+const T_ENQUETE="Como os alunos vão à escola\n(enquete com 200 estudantes)\nÔnibus: 90 alunos\nA pé: 60 alunos\nBicicleta: 30 alunos\nCarro: 20 alunos";
+const T_CHUVA="Chove lá fora\ne a casa encolhe.\nCada gota é um relógio\ncontando o tempo\nque não quer passar.";
+const T_RECEITA="Misture a farinha com o leite. Acrescente os ovos e bata bem. Leve ao forno por 30 minutos.";
+const T_PADARIA="Pães vendidos em uma padaria\nSegunda: 150\nTerça: 200\nQuarta: 250\nQuinta: 200\nSexta: 200";
+const T_PLANOS="Plano A: R$ 50,00 fixos + R$ 0,50 por minuto de ligação\nPlano B: R$ 80,00 fixos, com ligações ilimitadas";
+const BANCO=[
 {a:"LP",t:T_CIDA,f:"Texto escrito para este simulado.",q:"No contexto, a expressão final “ninguém imagina a ladeira que ela subiu” faz referência",o:["apenas ao caminho de terra perto da casa de Dona Cida.","ao esforço diário e às dificuldades da personagem, que não aparecem para quem a vê na avenida.","à falta de interesse de Dona Cida pelo trabalho.","ao cansaço provocado somente pela viagem de ônibus.","à vaidade da personagem, preocupada só com a aparência."],c:1,e:"Sentido figurado: a “ladeira” representa a rotina difícil que ninguém vê."},
 {a:"LP",t:T_CIDA,q:"A atitude de levar o sapato na sacola e ir de chinelo até o ponto revela, principalmente,",o:["pressa para não perder o ônibus.","descuido com a própria aparência.","preocupação em economizar e conservar o calçado.","desconforto com o sapato novo.","medo de escorregar na ladeira."],c:2,e:"O próprio texto explica: “para não gastar a sola”."},
 {a:"LP",t:T_AVISO,q:"Na frase “devido à manutenção da bomba d'água”, a expressão destacada introduz uma ideia de",o:["finalidade.","causa.","oposição.","condição.","comparação."],c:1,e:"“Devido a” = por causa de. A manutenção é a causa da interrupção."},
@@ -132,60 +152,229 @@ const Q=[
 {a:"CID",t:"Cores da coleta seletiva\nAzul: papel\nVermelho: plástico\nVerde: vidro\nAmarelo: metal",q:"Uma garrafa PET de refrigerante, já vazia e limpa, deve ser colocada no coletor de cor",o:["azul.","vermelha.","verde.","amarela.","marrom."],c:1,e:"PET é plástico: vermelho."},
 {a:"CID",q:"A Lei nº 11.340/2006, conhecida como Lei Maria da Penha, tem como objetivo",o:["regulamentar o trabalho doméstico.","garantir vagas para mulheres em universidades.","definir regras para a aposentadoria.","proteger crianças em situação de trabalho infantil.","criar mecanismos para coibir a violência doméstica e familiar contra a mulher."],c:4,e:"É a lei de proteção à mulher contra violência doméstica e familiar."},
 {a:"CID",t:"INFORMAÇÃO NUTRICIONAL\nPorção de 30 g (6 biscoitos)\nAçúcares: 6 g",f:"Rótulo de um pacote de biscoito de 150 g.",q:"Se uma pessoa comer o pacote inteiro, ela vai ingerir, de açúcar,",o:["6 g.","12 g.","18 g.","30 g.","150 g."],c:3,e:"150 g = 5 porções de 30 g; 5 × 6 g = 30 g."},
-{a:"CID",q:"Pilhas, baterias de celular e aparelhos eletrônicos velhos não devem ser jogados no lixo comum porque",o:["contêm metais pesados que contaminam o solo e a água, devendo ir para pontos de coleta específicos.","ocupam muito espaço nos caminhões de lixo.","podem ser vendidos por um preço alto.","são feitos apenas de papel reciclável.","atraem insetos transmissores de doenças."],c:0,e:"Mercúrio, chumbo e cádmio contaminam o ambiente; há pontos de coleta próprios."}
+{a:"CID",q:"Pilhas, baterias de celular e aparelhos eletrônicos velhos não devem ser jogados no lixo comum porque",o:["contêm metais pesados que contaminam o solo e a água, devendo ir para pontos de coleta específicos.","ocupam muito espaço nos caminhões de lixo.","podem ser vendidos por um preço alto.","são feitos apenas de papel reciclável.","atraem insetos transmissores de doenças."],c:0,e:"Mercúrio, chumbo e cádmio contaminam o ambiente; há pontos de coleta próprios."},
+{a:"LP",t:T_FEIRA,f:"Texto escrito para este simulado.",q:"Na fala de Seu Antônio, “o conselho, hoje, está em promoção: de graça”, o feirante",o:["anuncia que passou a cobrar pelos conselhos que dá.","reclama do freguês, que nunca paga pelo que leva.","responde com bom humor, tratando o conselho como se fosse mercadoria da barraca.","anuncia um desconto em todas as frutas.","recusa-se a atender o freguês."],c:2,e:"O freguês brinca ao pedir “um conselho” junto com as bananas, e Seu Antônio entra na brincadeira: o conselho vira “produto” em promoção, e de graça."},
+{a:"LP",t:T_FEIRA,q:"O trecho “já sabe de cor o que ele vai pedir” mostra que",o:["Seu Antônio decorou os preços de todas as frutas.","o feirante e o freguês já se conhecem e têm o hábito de se encontrar.","o freguês não sabe o que quer comprar.","Seu Antônio tem dificuldade para ler os pedidos.","o freguês chega sempre atrasado."],c:1,e:"“De cor” = de memória. Ele sabe o pedido porque o freguês é antigo, de casa."},
+{a:"LP",t:T_BIBLIO,f:"Aviso criado para este simulado.",q:"De acordo com o aviso, durante a reforma, o aluno que precisar devolver um livro deve",o:["esperar a biblioteca reabrir.","deixá-lo na portaria a qualquer hora.","levá-lo à secretaria da escola, de segunda a sexta, das 9h às 11h.","enviá-lo pelo correio.","entregá-lo ao bibliotecário em casa."],c:2,e:"A informação está explícita no segundo período do aviso."},
+{a:"LP",t:T_BIBLIO,q:"A frase final do aviso, “Contamos com a colaboração de todos”, tem a função de",o:["narrar um acontecimento passado.","fazer um pedido de forma educada, buscando a cooperação dos leitores.","criticar quem devolve livros fora do prazo.","dar uma ordem sem possibilidade de recusa.","fazer propaganda da escola."],c:1,e:"É uma fórmula de cortesia usada em avisos para pedir a cooperação do público."},
+{a:"LP",t:T_CICLO,f:"Notícia criada para este simulado.",q:"Pelo conteúdo da notícia, a nova ciclovia",o:["liga o terminal de ônibus ao parque da cidade.","tem 80 km de extensão.","foi construída em dois meses.","custou R$ 400 mil.","atende somente ciclistas profissionais."],c:0,e:"O texto diz que a ciclovia “liga o terminal de ônibus ao parque da cidade”."},
+{a:"LP",t:T_CICLO,q:"Assinale a frase que expressa uma opinião, e não um fato.",o:["A ciclovia tem 8 km de extensão.","A obra levou seis meses para ser concluída.","A obra custou R$ 2 milhões.","Cerca de 400 ciclistas usam a ciclovia por dia, segundo a prefeitura.","A ciclovia é a obra mais bonita que a prefeitura já fez."],c:4,e:"“Mais bonita” depende do ponto de vista de quem fala. As demais informações podem ser conferidas com dados."},
+{a:"LP",t:T_CELULAR,f:"Texto de opinião criado para este simulado.",q:"A ideia central defendida pelo autor do texto é que",o:["o celular deve ser proibido em todas as escolas.","o celular é benéfico em qualquer situação.","os professores não entendem de tecnologia.","o que decide se o celular ajuda ou atrapalha é o modo como ele é usado.","as pesquisas na internet são menos confiáveis que o dicionário."],c:3,e:"A tese aparece na conclusão: “o problema não está no celular, e sim na maneira como ele é usado”."},
+{a:"LP",t:T_CELULAR,q:"No trecho “ele se transforma em um aliado do aprendizado”, a palavra “aliado” indica algo que",o:["atrapalha os estudos.","favorece e ajuda no aprendizado.","substitui o professor.","é indiferente à aula.","só funciona fora da escola."],c:1,e:"Aliado = parceiro, quem ajuda. É um sentido figurado aplicado ao celular."},
+{a:"LP",t:T_ENQUETE,f:"Dados criados para este simulado.",q:"Com base na enquete, é correto afirmar que",o:["mais da metade dos alunos vai de ônibus.","a maioria dos alunos vai a pé.","o número de alunos que vai de bicicleta é igual ao dos que vão de carro.","os alunos que vão a pé são o dobro dos que vão de ônibus.","quase metade dos alunos vai de ônibus."],c:4,e:"90 de 200 alunos = 45%: quase metade, mas não mais da metade."},
+{a:"LP",t:T_CHUVA,f:"Poema escrito para este simulado.",q:"No verso “Cada gota é um relógio”, o eu lírico sugere que a chuva",o:["está atrasada.","faz a hora passar devagar, tornando a espera mais longa.","atrapalha o funcionamento dos relógios.","chegou em um horário previsto.","é muito forte."],c:1,e:"Metáfora: as gotas “contam o tempo”, e o tempo “não quer passar”, o que passa a sensação de lentidão."},
+{a:"LP",q:"Assinale a alternativa em que a concordância verbal está de acordo com a norma-padrão.",o:["Fazem anos que não nos vemos.","Houveram várias queixas sobre o barulho.","Choveram elogios ao professor no fim do ano.","Precisam-se de pedreiros.","Existe muitos livros na estante."],c:2,e:"“Elogios” é o sujeito de “choveram” (plural). Nas demais: “faz anos”, “houve queixas”, “precisa-se de” e “existem livros”."},
+{a:"LP",q:"Assinale a frase em que a concordância nominal está correta.",o:["Seguem anexo as fotos da obra.","Elas mesmo prepararam o jantar.","Ela estava meia cansada.","É proibido a entrada de menores.","Seguem anexas as fotos da obra."],c:4,e:"“Anexas” concorda com “fotos”. As demais deveriam ser: “elas mesmas”, “meio cansada” e “é proibida a entrada”."},
+{a:"LP",q:"Assinale a alternativa em que todas as palavras estão grafadas corretamente.",o:["excessão, privilégio, obsessão","exceção, previlégio, obsessão","exceção, privilégio, obseção","exceção, privilégio, obsessão","excessão, previlégio, obseção"],c:3,e:"Exceção (com ç), privilégio (com i) e obsessão (com ss)."},
+{a:"LP",q:"Assinale a frase em que a vírgula está empregada corretamente.",o:["O gato, subiu no telhado.","Comprei, pão leite e queijo.","Maria, venha até aqui agora.","Os alunos, estudaram bastante.","Não sei, se ele virá hoje."],c:2,e:"A vírgula isola o vocativo (“Maria”). Não se separa o sujeito do verbo nem o verbo do complemento."},
+{a:"LP",q:"Em “Entreguei-lhe o relatório ontem”, o pronome “lhe” exerce a função de",o:["sujeito.","adjunto adverbial.","complemento indireto (a ele ou a ela).","predicativo do sujeito.","vocativo."],c:2,e:"Entrega-se algo a alguém: “lhe” equivale a “a ele/a ela” e é complemento indireto."},
+{a:"LP",q:"Em “Se eu tivesse mais tempo, viajaria com mais frequência.”, o verbo “viajaria” está no",o:["presente do indicativo.","pretérito perfeito do indicativo.","futuro do presente do indicativo.","imperativo afirmativo.","futuro do pretérito do indicativo."],c:4,e:"A terminação -ria indica uma possibilidade que depende de uma condição: futuro do pretérito."},
+{a:"LP",q:"Na frase “O prefeito foi enfático ao negar o aumento do imposto”, a palavra “enfático” pode ser substituída, sem prejuízo de sentido, por",o:["hesitante.","irônico.","categórico.","vago.","indiferente."],c:2,e:"Enfático = que fala com ênfase e firmeza; categórico."},
+{a:"LP",q:"A palavra que tem sentido oposto ao de “escassez” é",o:["falta.","abundância.","pobreza.","avareza.","demora."],c:1,e:"Escassez é a pouca quantidade de algo; o antônimo é abundância (fartura)."},
+{a:"LP",q:"No período “O time jogou bem, mas perdeu a partida.”, a conjunção “mas” estabelece uma relação de",o:["adição.","explicação.","oposição.","conclusão.","tempo."],c:2,e:"“Mas” liga ideias contrárias: jogou bem × perdeu."},
+{a:"LP",t:T_RECEITA,f:"Trecho de receita criado para este simulado.",q:"O texto é predominantemente injuntivo (instrucional) porque",o:["conta uma história com personagens.","descreve as características de um objeto.","defende um ponto de vista.","orienta o leitor sobre o que fazer, passo a passo.","expressa sentimentos do autor."],c:3,e:"Verbos no imperativo e sequência de ações indicam um texto de instrução."},
+{a:"LP",q:"Em “Meu pai é um leão quando alguém mexe com a família”, ocorre",o:["antítese, pois une ideias opostas.","eufemismo, pois suaviza uma ideia ruim.","metáfora, pois aproxima o pai do leão por semelhança, sem usar “como”.","onomatopeia, pois imita um som.","pleonasmo, pois repete a mesma ideia."],c:2,e:"Metáfora: comparação implícita, que associa o pai à coragem e à ferocidade do leão."},
+{a:"LP",q:"Durante uma tempestade, alguém olha pela janela e diz: “Que dia lindo para um passeio!”. Nessa frase, o falante usa",o:["comparação, aproximando o dia de um passeio.","onomatopeia, imitando o som da chuva.","ironia, dizendo o contrário do que pensa.","gíria, por ser uma fala informal.","hipérbole, por exagerar na beleza do dia."],c:2,e:"Ironia: afirma o oposto do que realmente pensa, com intenção crítica ou bem-humorada."},
+{a:"LP",q:"“Mexerica”, “bergamota” e “tangerina” são nomes de uma mesma fruta usados em regiões diferentes do Brasil. Esse fato exemplifica",o:["um erro de português.","o uso de gírias de um grupo jovem.","uma variação regional da língua.","uma linguagem técnica de uma profissão.","uma variação provocada apenas pela idade do falante."],c:2,e:"Variação regional (ou geográfica): uma mesma coisa recebe nomes diferentes conforme a região."},
+{a:"LP",q:"Assinale a frase em que o verbo está corretamente flexionado.",o:["Se você ver o resultado, me ligue.","Quando eles verem a prova, vão se assustar.","Se eu ver você na rua, aviso.","Quando você vir a nota, vai gostar.","Se nós verem a nota, ficaremos felizes."],c:3,e:"O futuro do subjuntivo de “ver” é “vir” (se eu vir, quando você vir, se eles virem)."},
+{a:"LP",q:"Assinale a alternativa que completa corretamente a frase: “Ele acordou de ____ humor porque dormiu ____.”",o:["mal – mau.","mau – mal.","mau – mau.","mal – mal.","mau – bem."],c:1,e:"“Mau” (adjetivo, oposto de “bom”) acompanha “humor”; “mal” (advérbio, oposto de “bem”) modifica “dormiu”."},
+{a:"LP",q:"Assinale a alternativa que completa corretamente a frase: “____ você faltou à reunião de ontem?”",o:["Porque","Por quê","Porquê","Por que","Pôr que"],c:3,e:"No início da pergunta usa-se “por que” (separado e sem acento). “Por quê” só aparece no final da frase."},
+{a:"LP",q:"Assinale a alternativa que preenche corretamente as lacunas: “Faz muito tempo, ____ dois anos, que não nos vemos. O encontro será daqui ____ dois dias.”",o:["há – a","a – há","há – há","a – a","à – há"],c:0,e:"“Há” indica tempo já passado; “a” indica tempo futuro (“daqui a dois dias”)."},
+{a:"LP",q:"De acordo com as regras atuais de acentuação, a palavra acentuada corretamente é",o:["idéia.","jibóia.","feiúra.","bóia.","herói."],c:4,e:"Com o Acordo Ortográfico, “ideia”, “jiboia”, “feiura” e “boia” perderam o acento. “Herói” continua acentuada (oxítona terminada em -ói)."},
+{a:"LP",q:"Assinale a alternativa que transforma “A equipe construiu a ponte” para a voz passiva.",o:["A ponte construiu a equipe.","A ponte foi construída pela equipe.","A equipe foi construída pela ponte.","A equipe vai construir a ponte.","A ponte construiu-se a equipe."],c:1,e:"Na voz passiva, o objeto vira sujeito (“a ponte”) e o agente aparece com “por”: “foi construída pela equipe”."},
+{a:"LP",q:"Em “Choveu muito ontem”, a oração apresenta",o:["sujeito simples.","sujeito composto.","sujeito oculto.","sujeito indeterminado.","sujeito inexistente (oração sem sujeito)."],c:4,e:"Verbos que indicam fenômenos da natureza (chover, nevar) não têm sujeito."},
+{a:"MAT",q:"Uma camiseta custava R$ 80,00 e entrou em promoção com 25% de desconto. O preço promocional é",o:["R$ 55,00.","R$ 60,00.","R$ 65,00.","R$ 20,00.","R$ 75,00."],c:1,e:"25% de 80 = 20; 80 − 20 = 60."},
+{a:"MAT",q:"Em uma sala há 40 alunos, dos quais 60% são meninas. O número de meninos é",o:["12.","16.","20.","24.","28."],c:1,e:"Meninos = 40% de 40 = 16."},
+{a:"MAT",q:"Uma receita usa 3 xícaras de farinha para fazer 12 pães. Para fazer 40 pães, serão necessárias",o:["8 xícaras.","9 xícaras.","10 xícaras.","12 xícaras.","13 xícaras."],c:2,e:"3 ÷ 12 = 0,25 xícara por pão; 0,25 × 40 = 10 xícaras."},
+{a:"MAT",q:"Um carro percorre 12 km com 1 litro de gasolina. Para percorrer 150 km, ele gastará",o:["10 litros.","12 litros.","12,5 litros.","13,5 litros.","15 litros."],c:2,e:"150 ÷ 12 = 12,5 litros."},
+{a:"MAT",q:"Um terreno retangular tem 20 m de comprimento e 15 m de largura. Para cercá-lo com 3 voltas de arame, serão necessários",o:["105 m de arame.","140 m de arame.","210 m de arame.","300 m de arame.","900 m de arame."],c:2,e:"Perímetro = 2 × (20 + 15) = 70 m; 3 voltas = 210 m."},
+{a:"MAT",q:"Um triângulo retângulo tem catetos de 6 cm e 8 cm. A hipotenusa mede",o:["9 cm.","10 cm.","12 cm.","14 cm.","100 cm."],c:1,e:"Pitágoras: 6² + 8² = 36 + 64 = 100; √100 = 10."},
+{a:"MAT",q:"Considerando π = 3, a área de um círculo de raio 5 cm é de",o:["15 cm².","30 cm².","75 cm².","150 cm².","225 cm²."],c:2,e:"A = π × r² = 3 × 25 = 75 cm²."},
+{a:"MAT",q:"O valor de x na equação 3x − 7 = 11 é",o:["4.","5.","6.","7.","18."],c:2,e:"3x = 18, logo x = 6."},
+{a:"MAT",q:"A soma de dois números consecutivos é 85. O maior deles é",o:["41.","42.","43.","44.","45."],c:2,e:"x + (x + 1) = 85 → x = 42; o maior é 43."},
+{a:"MAT",q:"Em uma lanchonete, 2 sanduíches e 3 sucos custam R$ 36,00. Sabendo que cada suco custa R$ 4,00, o preço de um sanduíche é",o:["R$ 8,00.","R$ 10,00.","R$ 12,00.","R$ 14,00.","R$ 24,00."],c:2,e:"3 sucos = R$ 12,00; sobram R$ 24,00 para 2 sanduíches, ou seja, R$ 12,00 cada."},
+{a:"MAT",q:"Ao lançar um dado comum de seis faces, a probabilidade de sair um número maior que 4 é",o:["1/6.","1/3.","1/2.","2/3.","5/6."],c:1,e:"Casos favoráveis: 5 e 6 (2 casos) em 6 possíveis: 2/6 = 1/3."},
+{a:"MAT",q:"A média das notas de um aluno em cinco provas foi 8. As notas das quatro primeiras foram 6, 8, 7 e 9. A nota da quinta prova foi",o:["6.","7.","8.","9.","10."],c:4,e:"Soma total = 5 × 8 = 40; as quatro primeiras somam 30; a quinta foi 10."},
+{a:"MAT",q:"O consumo de energia de uma casa, em kWh, em cinco meses foi: 120, 150, 130, 180 e 140. A mediana desses valores é",o:["130.","140.","144.","150.","180."],c:1,e:"Em ordem crescente: 120, 130, 140, 150, 180. O valor central é 140. (A média seria 144.)"},
+{a:"MAT",t:T_PADARIA,f:"Dados criados para este simulado.",q:"Do total de pães vendidos de segunda a sexta, a quarta-feira representa",o:["15%.","20%.","25%.","30%.","50%."],c:2,e:"Total = 1.000 pães; quarta = 250; 250 ÷ 1.000 = 25%."},
+{a:"MAT",q:"Em uma planta, 1 cm representa 2 m. Uma sala com 6 m de comprimento será desenhada com",o:["1 cm.","2 cm.","3 cm.","6 cm.","12 cm."],c:2,e:"6 m ÷ 2 m por cm = 3 cm."},
+{a:"MAT",q:"Um cubo tem aresta de 3 dm. Sabendo que 1 dm³ equivale a 1 litro, sua capacidade é de",o:["9 litros.","18 litros.","27 litros.","81 litros.","270 litros."],c:2,e:"Volume = 3 × 3 × 3 = 27 dm³ = 27 litros."},
+{a:"MAT",q:"Uma garrafa tem 1,5 litro de suco. Quantos copos de 250 mL podem ser servidos com todo o conteúdo?",o:["4.","5.","6.","7.","8."],c:2,e:"1,5 L = 1.500 mL; 1.500 ÷ 250 = 6 copos."},
+{a:"MAT",q:"Uma viagem de 270 km foi feita a uma velocidade média de 90 km/h. O tempo gasto foi de",o:["2 horas.","2 h 30 min.","3 horas.","3 h 30 min.","4 horas."],c:2,e:"Tempo = distância ÷ velocidade = 270 ÷ 90 = 3 horas."},
+{a:"MAT",q:"Um produto de R$ 200,00 teve um aumento de 10% e, depois, um desconto de 10% sobre o novo preço. O preço final é",o:["R$ 180,00.","R$ 190,00.","R$ 198,00.","R$ 200,00.","R$ 220,00."],c:2,e:"200 × 1,10 = 220; 220 × 0,90 = 198. Aumento e desconto de mesma porcentagem não se anulam."},
+{a:"MAT",q:"O valor da expressão 2³ + 3² − 4 é",o:["9.","11.","13.","15.","17."],c:2,e:"2³ = 8 e 3² = 9: 8 + 9 − 4 = 13."},
+{a:"MAT",q:"Duas linhas de ônibus saem do terminal juntas às 6h. Uma sai a cada 12 minutos e a outra a cada 18 minutos. Elas voltarão a sair juntas às",o:["6h24.","6h30.","6h36.","6h48.","7h12."],c:2,e:"MMC(12, 18) = 36 minutos; 6h + 36 min = 6h36."},
+{a:"MAT",q:"Uma professora quer dividir 24 lápis e 36 canetas em kits iguais, sem sobras, formando o maior número possível de kits. Serão formados",o:["6 kits.","8 kits.","12 kits.","24 kits.","36 kits."],c:2,e:"MDC(24, 36) = 12 kits, cada um com 2 lápis e 3 canetas."},
+{a:"MAT",q:"Em um triângulo, dois ângulos internos medem 50° e 60°. O terceiro ângulo mede",o:["60°.","70°.","80°.","90°.","110°."],c:1,e:"A soma dos ângulos internos é 180°: 180 − 50 − 60 = 70°."},
+{a:"MAT",q:"Maria gastou 1/3 do salário no aluguel e 1/4 na alimentação. A fração do salário que sobrou é",o:["1/12.","5/12.","7/12.","1/2.","2/7."],c:1,e:"1/3 + 1/4 = 4/12 + 3/12 = 7/12 gastos; sobram 5/12."},
+{a:"MAT",q:"Um estacionamento cobra R$ 6,00 pela primeira hora e R$ 4,00 por hora adicional. Um carro ficou 5 horas. O valor pago foi",o:["R$ 20,00.","R$ 22,00.","R$ 24,00.","R$ 26,00.","R$ 30,00."],c:1,e:"6 + 4 × 4 = 6 + 16 = R$ 22,00."},
+{a:"MAT",t:T_PLANOS,f:"Planos criados para este simulado.",q:"Com quantos minutos de ligação por mês os dois planos custam exatamente o mesmo valor?",o:["30 minutos.","45 minutos.","60 minutos.","100 minutos.","160 minutos."],c:2,e:"50 + 0,50 × m = 80 → 0,50 × m = 30 → m = 60 minutos."},
+{a:"MAT",q:"O resultado da expressão (−3) × (−4) + (−5) é",o:["−17.","−7.","7.","17.","−12."],c:2,e:"(−3) × (−4) = +12; 12 + (−5) = 7."},
+{a:"MAT",q:"Um quadrado tem área de 81 cm². Seu perímetro é",o:["9 cm.","18 cm.","27 cm.","36 cm.","81 cm."],c:3,e:"Lado = √81 = 9 cm; perímetro = 4 × 9 = 36 cm."},
+{a:"MAT",q:"Após um desconto de 20%, uma bicicleta passou a custar R$ 640,00. O preço original era",o:["R$ 512,00.","R$ 700,00.","R$ 768,00.","R$ 800,00.","R$ 840,00."],c:3,e:"R$ 640,00 correspondem a 80% do preço original: 640 ÷ 0,8 = 800."},
+{a:"MAT",q:"Uma pessoa recebe R$ 3.000,00 por mês. Ela gasta 40% com moradia, 25% com alimentação e 15% com transporte. O valor que sobra é",o:["R$ 400,00.","R$ 600,00.","R$ 800,00.","R$ 900,00.","R$ 1.200,00."],c:1,e:"40% + 25% + 15% = 80%; sobram 20% de 3.000 = R$ 600,00."},
+{a:"CN",q:"A fotossíntese é o processo pelo qual as plantas produzem o próprio alimento. Os principais ingredientes usados nesse processo são",o:["oxigênio e glicose.","gás carbônico, água e luz solar.","apenas nitrogênio e sais minerais.","glicose e luz solar.","água e oxigênio."],c:1,e:"Gás carbônico + água + luz → glicose + oxigênio."},
+{a:"CN",q:"As estações do ano ocorrem principalmente porque",o:["a Terra se afasta e se aproxima do Sol ao longo do ano.","o eixo de rotação da Terra é inclinado em relação ao plano de sua órbita.","a Lua bloqueia parte da luz do Sol.","o Sol muda de tamanho durante o ano.","a Terra gira mais rápido no verão."],c:1,e:"A inclinação do eixo faz cada hemisfério receber luz solar de modo diferente ao longo do ano."},
+{a:"CN",q:"As fases da Lua são consequência",o:["da sombra da Terra projetada sobre a Lua todos os meses.","da mudança do tamanho da Lua.","da posição da Lua em relação à Terra e ao Sol, que muda a parte iluminada que vemos daqui.","do movimento de rotação da Terra.","das nuvens que cobrem a Lua."],c:2,e:"A Lua sempre tem metade iluminada pelo Sol; o que muda é quanto dessa metade enxergamos da Terra."},
+{a:"CN",q:"Um circuito elétrico simples é formado por uma pilha, fios e uma lâmpada. Para a lâmpada acender, é necessário que",o:["o circuito esteja aberto, interrompido em algum ponto.","o circuito esteja fechado, formando um caminho contínuo para a corrente.","a lâmpada fique longe da pilha.","a pilha esteja sem polo positivo.","os fios sejam feitos de plástico."],c:1,e:"A corrente só circula se houver um caminho contínuo (circuito fechado) feito de material condutor."},
+{a:"CN",q:"Na tabela periódica, os elementos químicos estão organizados em ordem crescente de",o:["número de nêutrons.","número atômico (quantidade de prótons).","ano de descoberta.","densidade.","ponto de fusão."],c:1,e:"O número atômico é a quantidade de prótons no núcleo e define o elemento."},
+{a:"CN",q:"Entre os materiais cobre, borracha, alumínio e madeira, os dois que são bons condutores de eletricidade são",o:["borracha e madeira.","cobre e borracha.","alumínio e madeira.","cobre e alumínio.","madeira e cobre."],c:3,e:"Metais, como cobre e alumínio, conduzem bem a eletricidade; borracha e madeira são isolantes."},
+{a:"CN",q:"A água do mar, que contém sal dissolvido, é classificada como",o:["substância simples.","substância composta pura.","mistura homogênea.","mistura heterogênea.","elemento químico."],c:2,e:"O sal dissolvido forma uma única fase com a água: mistura homogênea (solução)."},
+{a:"CN",q:"Uma das principais causas do aumento do gás carbônico na atmosfera, que agrava o efeito estufa, é",o:["a fotossíntese das florestas.","a queima de combustíveis fósseis e as queimadas.","o uso de energia solar.","a reciclagem de papel.","o plantio de árvores."],c:1,e:"Queimar combustíveis e florestas libera CO₂ que estava armazenado."},
+{a:"CN",q:"Entre os fenômenos abaixo, o que representa uma reação química é",o:["derreter um cubo de gelo.","quebrar um copo de vidro.","a formação de ferrugem em um prego.","dissolver açúcar na água.","evaporar a água de uma poça."],c:2,e:"Na ferrugem o ferro reage com o oxigênio e a umidade e forma outro material. Nos demais casos a substância continua a mesma."},
+{a:"CN",q:"No sistema digestório, a maior parte da absorção dos nutrientes dos alimentos ocorre no",o:["estômago.","esôfago.","intestino delgado.","intestino grosso.","fígado."],c:2,e:"O intestino delgado tem vilosidades que aumentam a área de absorção. O intestino grosso absorve principalmente água."},
+{a:"CN",q:"Na inspiração, o músculo que se contrai e desce, aumentando o volume da caixa torácica, é o",o:["coração.","diafragma.","bíceps.","estômago.","esôfago."],c:1,e:"A contração do diafragma aumenta o espaço dos pulmões e o ar entra."},
+{a:"CN",q:"Os genes, que carregam as informações hereditárias, são segmentos de",o:["proteínas do sangue.","DNA, localizado nos cromossomos.","gordura das células.","açúcares da membrana.","sais minerais."],c:1,e:"Genes são trechos de DNA, organizados nos cromossomos."},
+{a:"CN",q:"O pelo branco do urso-polar o ajuda a se camuflar na neve. Segundo a seleção natural, isso ocorre porque",o:["cada urso muda de cor conforme a necessidade.","os ursos de pelagem clara tinham mais chance de sobreviver e deixar descendentes.","o frio faz o pelo ficar branco em todos os ursos.","os ursos escolhem a cor do próprio pelo.","a neve pinta o pelo dos ursos."],c:1,e:"Características vantajosas no ambiente se tornam mais comuns ao longo das gerações."},
+{a:"CN",q:"Em uma lagoa, o esgoto lançado provoca a multiplicação excessiva de algas, o que reduz o oxigênio da água e pode matar peixes. Esse fenômeno é chamado de",o:["eutrofização.","fotossíntese.","chuva ácida.","inversão térmica.","erosão."],c:0,e:"O excesso de nutrientes provoca a proliferação de algas; sua decomposição consome o oxigênio."},
+{a:"CN",q:"A vacinação em massa protege também quem não pode ser vacinado, porque",o:["a vacina é transmitida pelo ar.","diminui a circulação do agente causador, dificultando a transmissão da doença.","elimina a necessidade de higiene.","torna todos os doentes imunes.","faz os vírus desaparecerem do planeta."],c:1,e:"Com mais pessoas protegidas, o agente infeccioso encontra menos hospedeiros para se espalhar."},
+{a:"CN",q:"Um aparelho de 2.000 W fica ligado por 3 horas. A energia consumida é de",o:["2 kWh.","3 kWh.","5 kWh.","6 kWh.","6.000 kWh."],c:3,e:"2.000 W = 2 kW; 2 kW × 3 h = 6 kWh."},
+{a:"CN",q:"Em um dia frio, a maçaneta metálica parece mais fria que a porta de madeira, embora as duas estejam na mesma temperatura. Isso acontece porque",o:["o metal tem temperatura menor que a madeira.","o metal conduz calor melhor e retira o calor da mão mais rapidamente.","a madeira produz calor.","a porta é mais grossa que a maçaneta.","o metal está sempre úmido."],c:1,e:"O metal é bom condutor térmico, por isso “rouba” calor da mão com mais rapidez."},
+{a:"CN",q:"Em uma tempestade, vemos o relâmpago antes de ouvir o trovão porque",o:["a luz se propaga muito mais rápido que o som.","o som se propaga mais rápido que a luz.","o trovão só acontece depois que a chuva começa.","o relâmpago e o trovão ocorrem em horas diferentes.","o ouvido humano demora a funcionar."],c:0,e:"A luz viaja a cerca de 300 000 km/s; o som, a cerca de 340 m/s."},
+{a:"CN",q:"Na estação de tratamento da água, a etapa em que se usa cloro para eliminar microrganismos é a",o:["floculação.","decantação.","filtração.","desinfecção.","captação."],c:3,e:"A desinfecção, geralmente com cloro, elimina bactérias e vírus que sobraram."},
+{a:"CN",q:"A compostagem transforma restos de alimentos em adubo. Esse processo é realizado principalmente por",o:["metais.","decompositores, como fungos e bactérias.","plantas verdes.","animais herbívoros.","minerais."],c:1,e:"Fungos e bactérias decompõem a matéria orgânica e devolvem nutrientes ao solo."},
+{a:"CN",q:"A camada de ozônio, na atmosfera, é importante porque",o:["produz as chuvas.","retém parte da radiação ultravioleta do Sol, que é prejudicial à vida.","aquece a Terra durante a noite.","fornece oxigênio para a respiração.","forma as nuvens."],c:1,e:"O ozônio filtra parte da radiação UV, que pode causar câncer de pele e danos aos ecossistemas."},
+{a:"HIS",q:"A chegada da família real portuguesa ao Brasil, em 1808, trouxe mudanças como",o:["o fim da escravidão.","a abertura dos portos às nações amigas e a criação de instituições como o Banco do Brasil.","a proclamação da República.","o fim do domínio espanhol.","a expulsão dos jesuítas."],c:1,e:"A corte instalada no Rio de Janeiro abriu os portos e criou o Banco do Brasil, entre outras instituições."},
+{a:"HIS",q:"A Proclamação da República, em 15 de novembro de 1889, foi liderada por militares e pôs fim",o:["à escravidão.","ao regime monárquico no Brasil.","ao domínio português.","à ditadura Vargas.","à ditadura militar."],c:1,e:"Deodoro da Fonseca liderou o movimento que derrubou a monarquia de D. Pedro II."},
+{a:"HIS",q:"O Estado Novo, instituído por Getúlio Vargas em 1937, caracterizou-se",o:["pelo voto livre e pela atuação de vários partidos.","pela centralização do poder, pela censura e pelo fim das eleições.","pela volta da monarquia.","pelo parlamentarismo.","pela escravidão."],c:1,e:"Foi um regime autoritário, com Congresso fechado, censura e forte controle do Estado."},
+{a:"HIS",q:"Entre 1964 e 1985, o Brasil viveu uma ditadura militar. Uma das características desse período foi",o:["a ampla liberdade de imprensa.","as eleições diretas para presidente.","a censura, a perseguição a opositores e os Atos Institucionais.","o fim das Forças Armadas.","o poder do Legislativo sobre o Executivo."],c:2,e:"Os Atos Institucionais ampliaram o poder dos militares; houve censura, repressão e perda de direitos políticos."},
+{a:"HIS",q:"O movimento “Diretas Já”, de 1983 e 1984, reivindicava",o:["o fim da escravidão.","a volta da monarquia.","eleições diretas para presidente da República.","a criação da CLT.","a independência do Brasil."],c:2,e:"Milhões de pessoas foram às ruas pedir o voto direto para presidente, no fim da ditadura militar."},
+{a:"HIS",q:"O lema da Revolução Francesa, de 1789, era",o:["Ordem e Progresso.","Liberdade, Igualdade e Fraternidade.","Deus, Pátria e Família.","Paz e Terra.","Tempo é dinheiro."],c:1,e:"“Liberdade, Igualdade e Fraternidade” resume os ideais da Revolução."},
+{a:"HIS",q:"O estopim da Primeira Guerra Mundial (1914–1918) foi",o:["a queda do Muro de Berlim.","o assassinato do arquiduque Francisco Ferdinando, herdeiro do trono austro-húngaro, em Sarajevo.","o ataque a Pearl Harbor.","a invasão da Polônia pela Alemanha nazista.","a Revolução Russa."],c:1,e:"O atentado de Sarajevo, em 1914, desencadeou as alianças que levaram à guerra."},
+{a:"HIS",q:"O Holocausto, ocorrido durante a Segunda Guerra Mundial, foi",o:["uma batalha naval no Pacífico.","o extermínio sistemático de milhões de judeus e de outros grupos pelo regime nazista.","um acordo de paz entre Alemanha e França.","o nome dado ao bombardeio de Londres.","uma greve de trabalhadores."],c:1,e:"O regime nazista assassinou cerca de seis milhões de judeus, além de ciganos, pessoas com deficiência e opositores."},
+{a:"HIS",q:"A Guerra Fria (1947–1991) foi uma disputa política, econômica e ideológica entre",o:["Alemanha e Japão.","França e Inglaterra.","China e Índia.","Estados Unidos e União Soviética.","Brasil e Argentina."],c:3,e:"Capitalismo (EUA) × socialismo (URSS), sem um confronto militar direto entre as duas potências."},
+{a:"HIS",q:"Na democracia ateniense, os cidadãos participavam diretamente das decisões políticas. Porém, não eram considerados cidadãos",o:["os homens adultos nascidos em Atenas.","as mulheres, os escravizados e os estrangeiros.","os filhos de famílias ricas.","os soldados.","os donos de terras."],c:1,e:"A cidadania era restrita: só homens adultos, livres e nascidos em Atenas votavam."},
+{a:"HIS",q:"Na Europa da Idade Média, o feudalismo se caracterizava por",o:["o comércio entre cidades ser a principal atividade.","a terra pertencer aos senhores feudais, e os servos trabalharem nela em troca de proteção.","o poder ser exercido por parlamentos eleitos.","as indústrias dominarem a economia.","a escravidão ter sido abolida."],c:1,e:"Economia rural, baseada na terra e em relações de servidão."},
+{a:"HIS",q:"O Renascimento, entre os séculos XIV e XVI, valorizou",o:["o isolamento da vida nos feudos.","o humanismo, a razão e a arte inspirada na Antiguidade clássica.","a produção em fábricas.","o poder absoluto da Igreja sobre a ciência.","a vida em castelos."],c:1,e:"O ser humano passou ao centro do interesse (humanismo), com avanços nas artes e nas ciências."},
+{a:"HIS",q:"No Brasil colonial, para a produção de açúcar no Nordeste, os portugueses utilizaram principalmente",o:["o trabalho assalariado de imigrantes europeus.","a mão de obra de africanos escravizados nos engenhos.","máquinas a vapor.","pequenos agricultores livres.","o trabalho voluntário de indígenas pago em dinheiro."],c:1,e:"A economia açucareira se apoiou no trabalho de africanos escravizados."},
+{a:"HIS",q:"No fim do século XIX e no início do XX, milhares de imigrantes italianos, japoneses e de outros países vieram trabalhar nas fazendas de café de São Paulo. Um dos motivos foi",o:["a falta de interesse pelo café.","a substituição gradual do trabalho escravo pelo trabalho assalariado.","a proibição da exportação do café.","a ocupação holandesa no Sudeste.","o fim do cultivo do café."],c:1,e:"Com o fim da escravidão (1888), os fazendeiros passaram a recrutar mão de obra imigrante."},
+{a:"HIS",q:"Os quilombos, como o de Palmares, liderado por Zumbi, foram",o:["colônias portuguesas.","comunidades formadas por pessoas negras que resistiram à escravidão.","engenhos de açúcar.","missões jesuíticas.","fortes holandeses."],c:1,e:"Quilombos eram espaços de liberdade e resistência de pessoas que fugiam da escravidão."},
+{a:"GEO",q:"A linha imaginária que divide a Terra nos hemisférios Norte e Sul é",o:["o Meridiano de Greenwich.","a Linha do Equador.","o Trópico de Capricórnio.","o Círculo Polar Ártico.","o Trópico de Câncer."],c:1,e:"O Equador (latitude 0°) separa os hemisférios Norte e Sul. Greenwich separa Leste e Oeste."},
+{a:"GEO",q:"A maior parte do território brasileiro está localizada na zona climática",o:["polar.","intertropical.","temperada do norte.","glacial.","subpolar."],c:1,e:"O Brasil fica, em sua maior parte, entre os trópicos de Câncer e de Capricórnio."},
+{a:"GEO",q:"A região brasileira com maior população absoluta é",o:["a Norte.","a Nordeste.","a Sul.","a Sudeste.","a Centro-Oeste."],c:3,e:"O Sudeste concentra cerca de 40% da população do país."},
+{a:"GEO",q:"A maior bacia hidrográfica do Brasil, em área, é a",o:["do Rio São Francisco.","do Paraná.","Amazônica.","do Tocantins-Araguaia.","do Paraguai."],c:2,e:"A bacia Amazônica é a maior do país e a maior do mundo em volume de água."},
+{a:"GEO",q:"Quando uma cidade cresce sem planejamento, é comum o surgimento de problemas como",o:["o excesso de áreas verdes.","o trânsito intenso, as moradias precárias e a falta de saneamento.","a redução da população.","o aumento das áreas rurais.","a queda da poluição."],c:1,e:"Crescimento desordenado sobrecarrega transporte, moradia e serviços básicos."},
+{a:"GEO",q:"Uma pirâmide etária com a base estreita e o topo largo indica uma população",o:["jovem, com alta natalidade.","envelhecida, com baixa natalidade e maior expectativa de vida.","em guerra.","sem idosos.","formada só por crianças."],c:1,e:"Base estreita = poucos nascimentos; topo largo = muitos idosos."},
+{a:"GEO",q:"A globalização pode ser definida como",o:["o isolamento entre os países.","a intensificação das trocas econômicas, culturais e de informação entre países.","o fim do comércio internacional.","a divisão do mundo em dois blocos.","o desaparecimento das fronteiras físicas."],c:1,e:"Transportes e comunicações rápidos aproximaram economias e culturas."},
+{a:"GEO",q:"No Brasil, a principal fonte de energia usada para gerar eletricidade é",o:["a nuclear.","o carvão mineral.","a hidráulica.","a eólica.","o gás natural."],c:2,e:"As usinas hidrelétricas respondem pela maior parte da eletricidade brasileira."},
+{a:"GEO",q:"Em qual das escalas abaixo o mapa mostra uma mesma área com mais detalhes?",o:["1 : 1 000 000","1 : 500 000","1 : 100 000","1 : 10 000","1 : 50 000"],c:3,e:"Quanto menor o denominador, maior a escala e mais detalhes aparecem."},
+{a:"GEO",q:"O clima semiárido do sertão nordestino é caracterizado por",o:["chuvas abundantes e bem distribuídas.","chuvas escassas e irregulares e longos períodos de seca.","neve no inverno.","temperaturas baixas o ano todo.","umidade constante."],c:1,e:"Chove pouco e de forma irregular, com temperaturas altas o ano todo."},
+{a:"GEO",q:"O desmatamento da Amazônia está ligado principalmente",o:["ao crescimento natural da floresta.","à expansão da pecuária e da agricultura e à extração ilegal de madeira.","à falta de chuva.","ao turismo.","à construção de aeroportos."],c:1,e:"As principais causas são a abertura de pasto, o cultivo agrícola e a exploração ilegal."},
+{a:"GEO",q:"A diferença de fuso horário entre dois lugares ocorre porque",o:["a Terra gira em torno do próprio eixo e o Sol ilumina cada lugar em horas diferentes.","a Lua influencia as horas.","a Terra dá uma volta ao redor do Sol a cada dia.","cada país escolhe livremente a hora que quiser.","os relógios atrasam com a distância."],c:0,e:"A rotação da Terra faz o dia amanhecer em momentos diferentes em cada longitude."},
+{a:"GEO",q:"O Mercosul é um bloco econômico formado inicialmente por",o:["Brasil, Argentina, Paraguai e Uruguai.","Brasil, México, Canadá e Estados Unidos.","França, Alemanha, Itália e Espanha.","China, Japão, Coreia e Índia.","Brasil, Chile, Peru e Colômbia."],c:0,e:"O Mercado Comum do Sul foi criado em 1991 por esses quatro países."},
+{a:"GEO",q:"O fenômeno em que uma camada de ar frio fica presa perto do solo, sob uma camada de ar quente, aumentando a poluição nas grandes cidades, é a",o:["chuva ácida.","maré vermelha.","inversão térmica.","ilha de calor.","erosão eólica."],c:2,e:"Na inversão térmica, o ar frio e poluído não sobe, e os poluentes ficam concentrados perto do chão."},
+{a:"GEO",q:"Uma fábrica de automóveis pertence a qual setor da economia?",o:["Primário.","Secundário.","Terciário.","Extrativista.","Informal."],c:1,e:"O setor secundário transforma matérias-primas em produtos industrializados."},
+{a:"CID",q:"A Lei Brasileira de Inclusão da Pessoa com Deficiência (Estatuto da Pessoa com Deficiência) tem como objetivo garantir",o:["acessibilidade, direito à educação inclusiva e ao trabalho em igualdade de condições.","a isenção de todos os impostos para qualquer pessoa.","a aposentadoria aos 40 anos para todos.","o direito de não estudar nem trabalhar.","a proibição do uso do transporte público."],c:0,e:"A Lei 13.146/2015 promove a inclusão e a cidadania das pessoas com deficiência."},
+{a:"CID",q:"Uma compra de R$ 37,80 foi paga com uma nota de R$ 50,00. O troco correto é",o:["R$ 11,20.","R$ 12,20.","R$ 12,80.","R$ 13,20.","R$ 17,80."],c:1,e:"50,00 − 37,80 = 12,20."},
+{a:"CID",q:"A conta de energia de uma casa mostra consumo de 150 kWh, com tarifa de R$ 0,80 por kWh. O valor da energia consumida é",o:["R$ 80,00.","R$ 120,00.","R$ 150,00.","R$ 187,50.","R$ 1.200,00."],c:1,e:"150 × 0,80 = R$ 120,00."},
+{a:"CID",q:"Uma TV de R$ 1.800,00 pode ser paga em 12 parcelas iguais, sem juros. Cada parcela será de",o:["R$ 120,00.","R$ 135,00.","R$ 150,00.","R$ 180,00.","R$ 216,00."],c:2,e:"1.800 ÷ 12 = R$ 150,00."},
+{a:"CID",q:"A Declaração Universal dos Direitos Humanos, de 1948, afirma que todos os seres humanos nascem",o:["com direitos diferentes, conforme sua origem.","livres e iguais em dignidade e em direitos.","com deveres, mas sem direitos.","submetidos à lei do mais forte.","com direitos apenas se forem cidadãos de países ricos."],c:1,e:"É o princípio do artigo 1º da Declaração."},
+{a:"CID",q:"Para combater as fake news (notícias falsas) na internet, o leitor deve",o:["compartilhar rápido, antes que a notícia suma.","confiar em qualquer mensagem enviada por conhecidos.","checar a fonte e procurar a mesma informação em veículos confiáveis.","acreditar nas notícias que confirmam o que já pensa.","ignorar a data da publicação."],c:2,e:"Verificar fonte, data e outras publicações reduz o risco de espalhar desinformação."},
+{a:"CID",q:"O Estatuto da Criança e do Adolescente (ECA) determina que é dever da família, da sociedade e do Estado assegurar, com prioridade, direitos como",o:["trabalho em período integral.","saúde, educação e proteção contra a violência.","dirigir veículos.","votar em eleições.","assinar contratos de trabalho."],c:1,e:"O ECA estabelece a proteção integral e a prioridade absoluta à infância e à adolescência."},
+{a:"CID",q:"No Brasil, o voto é obrigatório para as pessoas alfabetizadas com idade de",o:["16 a 17 anos.","18 a 70 anos.","mais de 70 anos.","qualquer idade.","apenas homens."],c:1,e:"É facultativo para quem tem 16 ou 17 anos, para os maiores de 70 e para os analfabetos."},
+{a:"CID",q:"Os impostos pagos pelos cidadãos devem ser usados pelo governo para",o:["pagar dívidas pessoais dos políticos.","financiar serviços públicos, como saúde, educação e segurança.","comprar bens apenas para empresas privadas.","sustentar apenas as Forças Armadas.","ser guardados e nunca utilizados."],c:1,e:"Os tributos financiam serviços e obras de interesse coletivo."},
+{a:"CID",q:"Entre os três erres da sustentabilidade (reduzir, reutilizar e reciclar), “reduzir” significa",o:["jogar menos lixo no mesmo saco.","consumir menos e evitar o desperdício, gerando menos resíduos.","comprar produtos descartáveis.","queimar o lixo.","enterrar os resíduos."],c:1,e:"Reduzir é o primeiro passo: diminuir o consumo e o lixo gerado."},
+{a:"CID",t:"Tomar 1 comprimido a cada 8 horas.",f:"Orientação de uma bula de remédio (criada para o simulado).",q:"Seguindo essa orientação, em um dia (24 horas) a pessoa tomará",o:["1 comprimido.","2 comprimidos.","3 comprimidos.","4 comprimidos.","8 comprimidos."],c:2,e:"24 ÷ 8 = 3 comprimidos por dia."}
 ];
-const L="ABCDE", KEY="simuladoEtec1", LIMITE=4*3600;
-let S=load()||novo(), tick=null, db=null;
-function novo(){return{fase:"inicio",nome:"",i:0,r:Array(Q.length).fill(null),tq:Array(Q.length).fill(0),seg:0,inicio:null,fim:null,id:null}}
-function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+const L="ABCDE", KEY="simuladoEtec1", KEYV="simuladoEtecVistas", LIMITE=4*3600;
+/* Prova completa: 50 questões, nesta proporção por matéria. Treino: só uma matéria, quantidade escolhida na tela inicial. */
+const COTA={LP:12,MAT:12,CN:9,HIS:6,GEO:6,CID:5};
+const NOMES={completa:"Prova completa",...AREAS};
+const nBanco=a=>BANCO.filter(q=>q.a===a).length;
+let Q=[], qtd=10, tick=null, db=null;
+let S=load()||novo(); aplica();
+const treino=()=>S.modo!=="completa";
+function embaralha(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+/* memória de quais questões já saíram neste aparelho: o sorteio prefere as que menos apareceram */
+function vistas(){try{return JSON.parse(localStorage.getItem(KEYV))||{}}catch(e){return{}}}
+function marcaVistas(){const v=vistas();S.ids.forEach(id=>v[id]=(v[id]||0)+1);try{localStorage.setItem(KEYV,JSON.stringify(v))}catch(e){}}
+function sorteia(modo){
+  const v=vistas(), cota=modo==="completa"?COTA:{[modo]:Math.min(qtd,nBanco(modo))};
+  let ids=[];
+  for(const a in cota){
+    const pool=embaralha(BANCO.map((_,k)=>k).filter(k=>BANCO[k].a===a));
+    pool.sort((x,y)=>(v[x]||0)-(v[y]||0)); /* sort estável: empate fica na ordem sorteada */
+    ids=ids.concat(pool.slice(0,cota[a]));
+  }
+  ids=embaralha(ids);
+  return{ids,perm:ids.map(()=>embaralha([0,1,2,3,4]))};
+}
+function novo(modo="completa"){const s=sorteia(modo);return{fase:"inicio",modo,nome:"",i:0,r:Array(s.ids.length).fill(null),tq:Array(s.ids.length).fill(0),seg:0,inicio:null,fim:null,id:null,ids:s.ids,perm:s.perm}}
+/* monta as questões da prova atual: ordem sorteada e alternativas embaralhadas */
+function aplica(){Q=S.ids.map((id,k)=>{const b=BANCO[id],p=S.perm[k];return{...b,id,o:p.map(j=>b.o[j]),c:p.indexOf(b.c)}})}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&!s.ids){s.ids=s.r.map((_,k)=>k);s.perm=s.r.map(()=>[0,1,2,3,4])}if(s&&!s.modo)s.modo="completa";return s}catch(e){return null}}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 const $=s=>document.querySelector(s), app=$("#app");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const hms=s=>{s=Math.max(0,Math.floor(s));return[Math.floor(s/3600),Math.floor(s/60)%60,s%60].map((n,k)=>k?String(n).padStart(2,"0"):n).join(":")};
+const relogio=()=>treino()?hms(S.seg):hms(LIMITE-S.seg);
 const resp=()=>S.r.filter(x=>x!==null).length;
 
 function render(){
   clearInterval(tick);
   if(S.fase==="inicio")return inicio();
-  if(S.fase==="prova"){prova();tick=setInterval(()=>{S.seg++;S.tq[S.i]++;const c=$("#clock");if(c)c.textContent=hms(LIMITE-S.seg);if(S.seg%5===0)save();if(S.seg>=LIMITE)entregar()},1000);return}
+  if(S.fase==="prova"){prova();tick=setInterval(()=>{S.seg++;S.tq[S.i]++;const c=$("#clock");if(c)c.textContent=relogio();if(S.seg%5===0)save();if(!treino()&&S.seg>=LIMITE)entregar()},1000);return}
   if(S.fase==="cartao")return cartao();
   resultado();
 }
+function reinicia(){S=novo();aplica();save();render();scrollTo(0,0)}
+function iniciar(modo,nome){
+  if(S.modo!==modo||S.inicio){S=novo(modo);aplica()}
+  S.nome=nome;S.inicio=new Date().toISOString();S.id=Date.now().toString(36);marcaVistas();S.fase="prova";save();render();scrollTo(0,0);
+}
 function inicio(){
   const andamento=S.inicio&&resp()>0;
+  const areas=Object.keys(AREAS);
   app.innerHTML=`<div class="wrap stack">
-  <div class="stack" style="gap:8px"><span class="area" style="align-self:flex-start">Simulado 1</span>
+  <div class="stack" style="gap:8px"><span class="area" style="align-self:flex-start">Simulado</span>
   <h1>Vestibulinho Etec</h1>
   <p class="muted" style="margin:0">Prova no mesmo formato do processo seletivo para o 1º módulo dos cursos técnicos: questões de múltipla escolha baseadas no conteúdo do Ensino Fundamental II, com textos, tabelas e situações do dia a dia.</p></div>
-  <div class="card stack">
-    <dl class="facts"><div><dt>Questões</dt><dd>${Q.length}</dd></div><div><dt>Alternativas</dt><dd>5 (A a E)</dd></div><div><dt>Tempo</dt><dd>4 horas</dd></div><div><dt>Corretas</dt><dd>1 por questão</dd></div></dl>
-    <div class="stack" style="gap:6px"><label for="nome">Seu nome</label><input id="nome" type="text" autocomplete="name" value="${esc(S.nome)}" placeholder="Ex.: Maria"></div>
+  <div class="card stack"><div class="stack" style="gap:6px"><label for="nome">Seu nome</label><input id="nome" type="text" autocomplete="name" value="${esc(S.nome)}" placeholder="Ex.: Maria"></div></div>
+  ${andamento?`<div class="card stack"><h2>${NOMES[S.modo]} em andamento</h2>
+    <span class="muted">${resp()} de ${Q.length} questões respondidas.</span>
+    <button class="btn" id="go">Continuar</button>
+    <button class="btn ghost" id="zera">Recomeçar do zero</button></div>`:`
+  <div class="card stack"><h2>Prova completa</h2>
+    <dl class="facts"><div><dt>Questões</dt><dd>${Object.values(COTA).reduce((a,b)=>a+b,0)}</dd></div><div><dt>Alternativas</dt><dd>5 (A a E)</dd></div><div><dt>Tempo</dt><dd>4 horas</dd></div><div><dt>Corretas</dt><dd>1 por questão</dd></div></dl>
     <ul class="muted" style="margin:0;padding-left:20px">
       <li>Faça como no dia da prova: sem consulta, sem calculadora, com papel para rascunho.</li>
       <li>Dá para voltar e trocar respostas antes de entregar.</li>
       <li>O relógio mostra quanto tempo ainda resta.</li>
+      <li>Cada prova sorteia questões de um banco de ${BANCO.length}, em ordem diferente e com as alternativas embaralhadas. As que você ainda não viu entram primeiro.</li>
     </ul>
-    <button class="btn" id="go">${andamento?`Continuar (${resp()} de ${Q.length} respondidas)`:"Começar a prova"}</button>
-    ${andamento?`<button class="btn ghost" id="zera">Recomeçar do zero</button>`:""}
-  </div></div>`;
-  $("#go").onclick=()=>{S.nome=$("#nome").value.trim();if(!S.inicio){S.inicio=new Date().toISOString();S.id=Date.now().toString(36)}S.fase="prova";save();render();scrollTo(0,0)};
-  if($("#zera"))$("#zera").onclick=()=>{S=novo();save();render()};
+    <button class="btn" id="go">Começar a prova completa</button></div>
+  <div class="card stack"><h2>Treinar por matéria</h2>
+    <p class="muted" style="margin:0">Treine uma matéria de cada vez antes da prova. Sem relógio: depois de cada resposta você vê o gabarito e a explicação.</p>
+    <div class="row" role="group" aria-label="Quantidade de questões do treino">${[10,20].map(n=>`<button class="chip" data-n="${n}" aria-pressed="${qtd===n}">${n} questões</button>`).join("")}</div>
+    <div class="grid2">${areas.map(a=>`<button class="btn ghost treina" data-m="${a}"><span>${AREAS[a]}</span><span class="sub muted">${Math.min(qtd,nBanco(a))} questões · banco de ${nBanco(a)}</span></button>`).join("")}</div>
+  </div>`}
+  </div>`;
+  const nome=()=>$("#nome").value.trim();
+  $("#go").onclick=()=>{if(andamento){S.nome=nome();S.fase="prova";save();render();scrollTo(0,0)}else iniciar("completa",nome())};
+  if($("#zera"))$("#zera").onclick=reinicia;
+  app.querySelectorAll(".treina").forEach(b=>b.onclick=()=>iniciar(b.dataset.m,nome()));
+  app.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{S.nome=nome();qtd=+b.dataset.n;inicio()});
 }
 function prova(){
-  const q=Q[S.i];
+  const q=Q[S.i], fb=treino()&&S.r[S.i]!==null, ok=S.r[S.i]===q.c;
   app.innerHTML=`<div class="bar"><div class="in"><span class="qnum">Questão ${S.i+1} <span class="muted">/ ${Q.length}</span></span>
-  <span class="clock" aria-label="tempo restante" id="clock">${hms(LIMITE-S.seg)}</span>
+  <span class="clock" aria-label="${treino()?"tempo de treino":"tempo restante"}" id="clock">${relogio()}</span>
   <button class="btn ghost" id="vercartao" style="padding:8px 12px">Cartão</button></div>
   <div class="prog"><i style="width:${resp()/Q.length*100}%"></i></div></div>
   <div class="wrap stack">
-    <span class="area" style="align-self:flex-start">${AREAS[q.a]}</span>
+    <span class="area" style="align-self:flex-start">${AREAS[q.a]}${treino()?" · treino":""}</span>
     ${q.t?`<div class="texto">${esc(q.t)}</div>${q.f?`<div class="fonte">${esc(q.f)}</div>`:""}`:""}
     <p style="margin:0;font-weight:500">${esc(q.q)}</p>
-    <ul class="alts">${q.o.map((o,k)=>`<li><button class="alt" data-k="${k}" aria-pressed="${S.r[S.i]===k}"><span class="b">${L[k]}</span><span>${esc(o)}</span></button></li>`).join("")}</ul>
+    <ul class="alts">${q.o.map((o,k)=>{const cls=fb?(k===q.c?" certa":(k===S.r[S.i]?" errada":"")):"";return`<li><button class="alt${cls}" data-k="${k}" aria-pressed="${S.r[S.i]===k}"${fb?" disabled":""}><span class="b">${L[k]}</span><span>${esc(o)}</span></button></li>`}).join("")}</ul>
+    ${fb?`<div class="card stack" id="fb" style="gap:6px"><b class="tag ${ok?"ok":"no"}">${ok?"Acertou!":"Não foi dessa vez."}</b>${ok?"":`<span>Resposta certa: <b>${L[q.c]}) ${esc(q.o[q.c])}</b></span>`}<span class="muted">${esc(q.e)}</span></div>`:""}
   </div>
   <div class="nav"><div class="in"><button class="btn ghost" id="ant" ${S.i===0?"disabled":""}>Anterior</button>
-  ${S.i<Q.length-1?`<button class="btn" id="prox">Próxima</button>`:`<button class="btn" id="fim">Revisar e entregar</button>`}</div></div>`;
-  app.querySelectorAll(".alt").forEach(b=>b.onclick=()=>{const k=+b.dataset.k;S.r[S.i]=S.r[S.i]===k?null:k;save();app.querySelectorAll(".alt").forEach(x=>x.setAttribute("aria-pressed",S.r[S.i]===+x.dataset.k));$(".prog i").style.width=resp()/Q.length*100+"%"});
+  ${S.i<Q.length-1?`<button class="btn" id="prox">Próxima</button>`:`<button class="btn" id="fim">${treino()?"Ver resultado":"Revisar e entregar"}</button>`}</div></div>`;
+  app.querySelectorAll(".alt").forEach(b=>b.onclick=()=>{
+    const k=+b.dataset.k;
+    if(treino()){if(S.r[S.i]!==null)return;S.r[S.i]=k;save();prova();const f=$("#fb");if(f)f.scrollIntoView({block:"nearest",behavior:"smooth"});return}
+    S.r[S.i]=S.r[S.i]===k?null:k;save();app.querySelectorAll(".alt").forEach(x=>x.setAttribute("aria-pressed",S.r[S.i]===+x.dataset.k));$(".prog i").style.width=resp()/Q.length*100+"%"
+  });
   $("#ant").onclick=()=>ir(S.i-1);
   if($("#prox"))$("#prox").onclick=()=>ir(S.i+1);
   if($("#fim"))$("#fim").onclick=()=>{S.fase="cartao";save();render();scrollTo(0,0)};
@@ -195,36 +384,36 @@ function ir(i){S.i=i;save();render();scrollTo(0,0)}
 function cartao(){
   const falta=Q.length-resp();
   app.innerHTML=`<div class="wrap stack"><h2>Cartão-resposta</h2>
-  <p class="muted" style="margin:0">Toque num número para voltar à questão. Restam ${hms(LIMITE-S.seg)} de prova.</p>
+  <p class="muted" style="margin:0">Toque num número para voltar à questão. ${treino()?`Tempo de treino: ${hms(S.seg)}.`:`Restam ${hms(LIMITE-S.seg)} de prova.`}</p>
   <div class="grid">${Q.map((_,k)=>`<button class="cell ${S.r[k]!==null?"on":""} ${k===S.i?"cur":""}" data-k="${k}">${k+1}${S.r[k]!==null?" "+L[S.r[k]]:""}</button>`).join("")}</div>
   ${falta?`<div class="warn">Faltam <b>${falta}</b> questões sem resposta. Questão em branco conta como erro.</div>`:""}
-  <div class="row"><button class="btn ghost" id="volta">Voltar à prova</button><button class="btn" id="entrega">Entregar a prova</button></div>
+  <div class="row"><button class="btn ghost" id="volta">Voltar à prova</button><button class="btn" id="entrega">${treino()?"Finalizar treino":"Entregar a prova"}</button></div>
   <div id="conf"></div></div>`;
   app.querySelectorAll(".cell").forEach(b=>b.onclick=()=>{S.fase="prova";ir(+b.dataset.k)});
   $("#volta").onclick=()=>{S.fase="prova";save();render()};
-  $("#entrega").onclick=()=>{$("#conf").innerHTML=`<div class="card stack"><b>Entregar agora?</b><span class="muted">Depois de entregar não dá para mudar as respostas.</span><div class="row"><button class="btn" id="sim">Sim, entregar</button><button class="btn ghost" id="nao">Ainda não</button></div></div>`;$("#sim").onclick=entregar;$("#nao").onclick=()=>$("#conf").innerHTML="";$("#sim").focus()};
+  $("#entrega").onclick=()=>{$("#conf").innerHTML=`<div class="card stack"><b>${treino()?"Finalizar o treino agora?":"Entregar agora?"}</b><span class="muted">Depois de ${treino()?"finalizar":"entregar"} não dá para mudar as respostas.</span><div class="row"><button class="btn" id="sim">${treino()?"Sim, finalizar":"Sim, entregar"}</button><button class="btn ghost" id="nao">Ainda não</button></div></div>`;$("#sim").onclick=entregar;$("#nao").onclick=()=>$("#conf").innerHTML="";$("#sim").focus()};
 }
 function entregar(){S.fase="fim";S.fim=new Date().toISOString();save();enviar();render();scrollTo(0,0)}
 function dados(){
-  const itens=Q.map((q,k)=>({n:k+1,area:AREAS[q.a],marcada:S.r[k]===null?null:L[S.r[k]],correta:L[q.c],acertou:S.r[k]===q.c,tempoSeg:S.tq[k]}));
-  return{nome:S.nome||"(sem nome)",simulado:1,inicio:S.inicio,fim:S.fim,duracaoSeg:S.seg,acertos:itens.filter(x=>x.acertou).length,total:Q.length,itens};
+  const itens=Q.map((q,k)=>({n:k+1,q:q.id+1,area:AREAS[q.a],marcada:S.r[k]===null?null:L[S.r[k]],correta:L[q.c],acertou:S.r[k]===q.c,tempoSeg:S.tq[k]}));
+  return{nome:S.nome||"(sem nome)",modo:S.modo,inicio:S.inicio,fim:S.fim,duracaoSeg:S.seg,acertos:itens.filter(x=>x.acertou).length,total:Q.length,itens};
 }
 function texto(){
   const d=dados();
-  return `Simulado Etec 1 · ${d.nome}\nAcertos: ${d.acertos}/${d.total} · Tempo: ${hms(d.duracaoSeg)}\n`+d.itens.map(x=>`${x.n} ${x.marcada||"-"}${x.acertou?"✓":"✗"+x.correta} ${x.tempoSeg}s`).join("\n");
+  return `Simulado Etec · ${NOMES[d.modo]} · ${d.nome}\nAcertos: ${d.acertos}/${d.total} · Tempo: ${hms(d.duracaoSeg)}\n`+d.itens.map(x=>`${x.n} (q${x.q}) ${x.marcada||"-"}${x.acertou?"✓":"✗"+x.correta} ${x.tempoSeg}s`).join("\n");
 }
 async function enviar(){return;
   try{db=db||await window.claude?.use?.("db");if(!db)return;await db.collection("tentativas").doc(S.id||Date.now().toString(36)).set(dados());const s=$("#salvo");if(s)s.textContent="Respostas salvas online."}catch(e){}
 }
 function resultado(){
   const d=dados(),pct=Math.round(d.acertos/d.total*100);
-  const porArea=Object.values(AREAS).map(a=>{const it=d.itens.filter(x=>x.area===a);return{a,ok:it.filter(x=>x.acertou).length,n:it.length}});
+  const porArea=Object.values(AREAS).map(a=>{const it=d.itens.filter(x=>x.area===a);return{a,ok:it.filter(x=>x.acertou).length,n:it.length}}).filter(p=>p.n>0);
   app.innerHTML=`<div class="wrap stack">
-  <div class="card stack"><span class="muted">${esc(d.nome)} · prova entregue</span>
+  <div class="card stack"><span class="muted">${esc(d.nome)} · ${treino()?`treino de ${esc(NOMES[d.modo])} finalizado`:"prova entregue"}</span>
   <div><span class="big">${d.acertos}</span><span class="muted"> de ${d.total} acertos (${pct}%)</span></div>
-  <span class="muted">Tempo usado: ${hms(d.duracaoSeg)} de 4:00:00</span>
-  
-  <div class="row"><a class="btn" id="zap" target="_blank" rel="noopener" style="text-decoration:none;text-align:center">Enviar pelo WhatsApp</a><button class="btn ghost" id="copiar">Copiar respostas</button><button class="btn ghost" id="refazer">Fazer de novo</button></div>
+  <span class="muted">Tempo usado: ${hms(d.duracaoSeg)}${treino()?"":" de 4:00:00"}</span>
+
+  <div class="row"><a class="btn" id="zap" target="_blank" rel="noopener" style="text-decoration:none;text-align:center">Enviar pelo WhatsApp</a><button class="btn ghost" id="copiar">Copiar respostas</button><button class="btn ghost" id="refazer">Novo simulado ou treino</button></div>
   <span class="muted" id="cmsg" style="font-size:.9rem">Copie e mande para quem vai analisar o resultado.</span>
   <textarea id="txt" readonly hidden style="width:100%;min-height:120px;font:inherit;font-size:.85rem"></textarea></div>
   <div class="card"><table><thead><tr><th>Área</th><th>Acertos</th></tr></thead><tbody>${porArea.map(p=>`<tr><td>${p.a}</td><td>${p.ok}/${p.n}</td></tr>`).join("")}</tbody></table></div>
@@ -237,7 +426,7 @@ function resultado(){
   <span class="muted">${esc(q.e)}</span></div>`}).join("")}
   </div>`;
   $("#zap").href="https://wa.me/?text="+encodeURIComponent(texto());$("#copiar").onclick=()=>{const t=texto();navigator.clipboard.writeText(t).then(()=>$("#cmsg").textContent="Copiado! Agora é só colar no WhatsApp.").catch(()=>{const a=$("#txt");a.hidden=false;a.value=t;a.select();$("#cmsg").textContent="Selecione o texto abaixo e copie."})};
-  $("#refazer").onclick=()=>{$("#cmsg").innerHTML=`Isso apaga o resultado atual deste aparelho. <button class="btn ghost" id="ok2" style="padding:6px 10px">Apagar e refazer</button>`;$("#ok2").onclick=()=>{S=novo();save();render()}};
+  $("#refazer").onclick=()=>{$("#cmsg").innerHTML=`Isso apaga o resultado atual deste aparelho. <button class="btn ghost" id="ok2" style="padding:6px 10px">Apagar e voltar ao início</button>`;$("#ok2").onclick=reinicia};
 }
 render();
 </script>
